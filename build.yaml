@@ -13,7 +13,9 @@
 #
 ---
 include:
-  - board: nice_nano/nrf52840/zmk
+  # nice_nano//zmk = Nice!Nano v2 ZMK board variant (required since Zephyr 4.1)
+  # https://zmk.dev/blog/2025/12/09/zephyr-4-1#zmk-board-variant
+  - board: nice_nano//zmk
     shield: cornix_dongle_adapter cornix_dongle_eyelash dongle_display
     snippet: studio-rpc-usb-uart nrf52840-nosd
     artifact-name: cornix_dongle_nosd
@@ -22,7 +24,7 @@ include:
   #   shield: cornix_dongle_adapter dongle_screen
   #   snippet: studio-rpc-usb-uart
   #   artifact-name: cornix_dongle_zds_see
-  # - board: nice_nano
+  # - board: nice_nano//zmk
   #   shield: cornix_dongle_adapter dongle_screen
   #   snippet: studio-rpc-usb-uart
   #   artifact-name: cornix_dongle_zds_nano
@@ -38,13 +40,13 @@ include:
     shield: cornix_indicator
     artifact-name: cornix_right_nosd
 
-
   - board: cornix_right
     shield: settings_reset
     snippet: studio-rpc-usb-uart nrf52840-nosd
     artifact-name: cornix_reset
 
-  - board: nice_nano/nrf52840/zmk
+  - board: nice_nano//zmk
     shield: settings_reset
     snippet: studio-rpc-usb-uart nrf52840-nosd
     artifact-name: reset_nicenano_nosd
+

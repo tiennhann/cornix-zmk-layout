@@ -13,9 +13,11 @@
 
     aliases {
         status-ws2812 = &led_strip;
+        led-strip = &led_strip;
     };
 
     chosen {
+        zephyr,led-strip = &led_strip;
         widget,rgb = &led_strip;
     };
 };
