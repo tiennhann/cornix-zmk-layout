@@ -6,8 +6,9 @@ draw_config:
     rect.held, rect.combo.held {
         fill: #ffd166;
     }
-    /* Base layer: legends of keys that activate a layer are drawn in bold amber
-       so the entry points stand out on the Base map too. */
+    /* Base layer: legends of keys that activate a layer (Symbol/Nav/...) are
+       drawn in bold amber so the entry points stand out on the Base map too.
+       (A full key fill here isn't possible together with the held highlight.) */
     .layer-activator {
         fill: #c8860a;
         font-weight: bold;
@@ -15,39 +16,53 @@ draw_config:
 
 parse_config:
   # Mark ALL key sequences that reach a layer as "held" (amber), not just the
-  # first — e.g. Symbols is reachable from both &mo 2 and &lt 2 BACKSPACE.
+  # first. Symbol is reachable from the left thumb, so this keeps highlights
+  # consistent with go60.
   mark_alternate_layer_activators: true
   # NOTE: keys listed in raw_binding_map are NOT auto-detected as layer
   # activators, so they would lose the "held" highlight on the target layer.
-  # Leave momentary activators (&mo / &lt) OUT of this map so keymap-drawer
-  # marks them amber on the target layers and links their legends.
+  # Leave momentary activators (&mo LAYER_Symbol / &mo LAYER_Nav) OUT of this
+  # map so keymap-drawer marks them amber on the Symbol/Nav layers.
   raw_binding_map:
-    # Layer toggles / jumps (not momentary holds)
-    "&to 0": Base
-    "&tog 1": Win Toggle
-    # Firmware / power
+    # --- Custom behaviors that the parser can't trace; label them manually ---
+    "&keypad_td": Keypad
+    "&to LAYER_Base": Base
+    # --- Magic / firmware ---
+    "&bt_0": BT 0
+    "&bt_1": BT 1
+    "&bt_2": BT 2
+    "&bt_3": BT 3
+    "&out OUT_USB": USB Out
     "&bootloader": Bootloader
-    "&ext_power EP_ON": Ext Power
-    # Bluetooth
+    "&sys_reset": Reset
     "&bt BT_CLR": BT Clear
     "&bt BT_CLR_ALL": BT Clear All
-    "&bt BT_SEL 0": BT 0
-    "&bt BT_SEL 1": BT 1
-    "&bt BT_SEL 2": BT 2
-    "&bt BT_SEL 3": BT 3
-    "&bt BT_SEL 4": BT 4
-    "&bt BT_DISC 0": BT Disc 0
-    "&bt BT_DISC 1": BT Disc 1
-    "&bt BT_DISC 2": BT Disc 2
-    "&bt BT_DISC 3": BT Disc 3
-    "&bt BT_DISC 4": BT Disc 4
-    # Mouse (Navi layer)
-    "&mkp MB1": Left Click
-    "&mkp MB2": Right Click
-    "&mkp MB3": Middle Click
+    # Clipboard (macOS Cmd)
+    "&kp LG(Z)": Undo
+    "&kp LG(X)": Cut
+    "&kp LG(C)": Copy
+    "&kp LG(V)": Paste
+    "&kp LG(LS(V))": Paste Match
+    # Mouse on Nav layer
+    "&mkp LCLK": Left Click
+    "&mkp RCLK": Right Click
+    "&mkp MCLK": Middle Click
     "&mmv MOVE_UP": Mouse Up
     "&mmv MOVE_DOWN": Mouse Down
     "&mmv MOVE_LEFT": Mouse Left
     "&mmv MOVE_RIGHT": Mouse Right
     "&msc SCRL_UP": Scroll Up
-    "&msc SCRL_DOWN": Scroll Down
+    # Navigation layer (macOS)
+    "&kp LC(LS(TAB))": Prev Tab
+    "&kp LC(TAB)": Next Tab
+    "&kp LG(LBKT)": Browser Back
+    "&kp LG(RBKT)": Browser Fwd
+    "&select_word_back": Select Word Back
+    "&select_word": Select Word
+    "&select_line": Select Line
+    "&search_selected": Search Selected
+    "&kp LC(LG(LS(N4)))": Copy Area Screenshot
+    "&kp LC(LG(LS(N3)))": Copy Screenshot
+    "&kp LG(F)": Find
+    "&kp LG(LS(G))": Find Prev
+    "&kp LG(G)": Find Next
