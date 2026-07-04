@@ -23,6 +23,10 @@
         compatible = "zmk,kscan-gpio-matrix";
         diode-direction = "col2row";
         wakeup-source;
+        // Extra release debounce reduces chatter that can look like a held key.
+        // Global Kconfig in config/cornix.conf overrides these when set.
+        debounce-press-ms = <10>;
+        debounce-release-ms = <15>;
     };
 
 };
