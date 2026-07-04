@@ -42,12 +42,12 @@ layers:
   - '`'
   - DEL
   - LGUI
+  - LCTRL
   - BSPC
   - Symbol
-  - LCTRL
-  - LALT
   - Nav
   - SPACE
+  - LALT
   - '['
   - ']'
   - '-'
@@ -93,9 +93,9 @@ layers:
   - ''
   - ''
   - ''
-  - {t: ▽, type: trans}
-  - {type: held}
   - ''
+  - ''
+  - {type: held}
   - ''
   - ''
   - ''
@@ -147,8 +147,8 @@ layers:
   - Left Click
   - Right Click
   - Middle Click
-  - ''
   - {type: held}
+  - ''
   - ''
   - Find
   - Find Prev
