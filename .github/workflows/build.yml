@@ -2,9 +2,15 @@ name: Build ZMK firmware
 on:
   workflow_dispatch:
   push:
+    # Without an explicit branches filter, tags-ignore alone makes GitHub treat
+    # this as a tags-only workflow — so pushes to main never run the build.
+    branches:
+      - "**"
     paths:
-      - "boards/*"
-      - "config/*"
+      - "boards/**"
+      - "config/**"
+      - "build.yaml"
+      - ".github/workflows/build.yml"
     tags-ignore:
       - "*"
 
