@@ -21,13 +21,14 @@ manifest:
       remote: urob
       revision: main
       clone-depth: 1
-    # hitsmaxft fork: WS2812 + 2-LED spatial map (battery + connection)
-    - name: zmk-rgbled-widget
-      remote: hitsmaxft
-      revision: main
-      clone-depth: 1
-
+    # zmk-rgbled-widget (hitsmaxft) currently breaks all CI builds on ZMK main
+    # (even targets that do not use cornix_indicator). Re-enable when fixed.
+    # - name: zmk-rgbled-widget
+    #   remote: hitsmaxft
+    #   revision: main
+    #   clone-depth: 1
     - name: zmk-dongle-display
+
       remote: englmaxi
       revision: main
       clone-depth: 1
