@@ -54,16 +54,19 @@ you have two solutions
 - [x] no-SD image, since v2.3
 - [x] support various of dongles
 - [x] upgrade to zephyr4.1 and lvgl9 , since v2.7, no dongle screen support yet
-- [ ] rgb since in future v3
+- [x] RGB status indicators via `cornix_indicator` + [zmk-rgbled-widget](https://github.com/hitsmaxft/zmk-rgbled-widget)
 
 
 ### about RGB
 
-Cornix shield has 2 RGB LEDs on each side, controled by PWM in the stock firmware.
+Cornix has 2 RGB LEDs per half. Stock firmware uses them for **battery** and **Bluetooth/connection** status. ZMK does not drive them as PWM like RMK; this repo uses WS2812 over SPI with the `cornix_indicator` shield:
 
-The replacement solution is adapting the RGB indicator module to light up these RGBs, to achieve the same effect as the stock firmware, which uses the RGB LEDs to indicate battery status and connection status.
+| LED | Meaning |
+|-----|---------|
+| 0 | Battery — green / yellow / red (critical blinks) |
+| 1 | Connection — blue connected, yellow advertising, red disconnected; cyan if USB has priority |
 
-But it is not supported yet in this repository.  PR is welcome!
+Enabled by default in `build.yaml` (`shield: cornix_indicator`). Uses more power than LEDs-off. To disable, remove the shield line from the left/right build targets.
 
 ## Supported Hardware: Cornix Split Keyboard
 
