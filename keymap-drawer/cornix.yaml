@@ -22,11 +22,11 @@ layers:
   - H
   - {t: J, h: RSHFT}
   - {t: K, h: RGUI}
-  - {t: L, h: RALT}
+  - {t: L, h: LALT}
   - {t: ;, h: RCTRL}
   - ''''
-  - Adjust
-  - {t: Z, h: LGUI}
+  - Magic
+  - Z
   - X
   - C
   - V
@@ -38,72 +38,21 @@ layers:
   - ','
   - .
   - /
-  - BACKSPACE
-  - ''
-  - ''
-  - ''
-  - {t: ESCAPE, h: NumPad}
-  - Symbols
-  - {t: SPACE, h: Navi}
-  - ENTER
-  - Mix
-  - {t: BACKSPACE, h: Symbols}
-  - ''
-  - ''
-  - ''
-  Windows:
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: A, h: LCTRL}
-  - {t: S, h: LALT}
-  - {t: D, h: LCTRL}
-  - {t: F, h: LSHFT}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: J, h: RSHFT}
-  - {t: K, h: RCTRL}
-  - {t: L, h: RALT}
-  - {t: ;, h: RCTRL}
-  - {t: ▽, type: trans}
+  - Keypad
+  - '`'
+  - DEL
   - LGUI
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - ''
-  - ''
-  - ''
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - ''
-  - ''
-  - ''
-  Symbols:
-  - ''
+  - BSPC
+  - Symbol
+  - LCTRL
+  - LALT
+  - Nav
+  - SPACE
+  - '['
+  - ']'
+  - '-'
+  Symbol:
+  - CAPS
   - '!'
   - '@'
   - '#'
@@ -114,47 +63,149 @@ layers:
   - '*'
   - (
   - )
-  - '|'
+  - '~'
+  - ''
+  - '1'
+  - '2'
+  - '3'
+  - '4'
+  - '5'
+  - '6'
+  - '7'
+  - '8'
+  - '9'
+  - '0'
+  - '`'
   - ''
   - ''
+  - '-'
+  - +
+  - _
+  - '='
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
   - '['
   - ']'
   - '{'
   - '}'
-  - '='
-  - _
-  - '-'
-  - +
-  - '"'
-  - ''''
   - ''
   - ''
-  - ']'
-  - )
-  - '|'
-  - \
+  - ''
+  - ''
+  - ''
+  - {t: ▽, type: trans}
+  - {type: held}
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  Nav:
+  - ''
+  - Prev Tab
+  - Next Tab
+  - ''
+  - Browser Back
+  - Browser Fwd
+  - PG UP
+  - HOME
+  - UP
+  - END
+  - Search Selected
+  - ''
+  - ''
+  - ''
+  - Mouse Left
+  - Mouse Down
+  - Mouse Right
+  - Scroll Up
+  - PG DN
+  - LEFT
+  - DOWN
+  - RIGHT
+  - Copy Area Screenshot
+  - ''
+  - ''
+  - ''
+  - ''
+  - Mouse Up
+  - PG UP
+  - PG DN
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - /
-  - '?'
-  - '`'
-  - '~'
-  - ''''
+  - ''
+  - Select Word Back
+  - Select Word
+  - Select Line
+  - Copy Screenshot
   - ''
   - ''
   - ''
   - ''
+  - Left Click
+  - Right Click
+  - Middle Click
   - ''
   - {type: held}
-  - {t: ▽, type: trans}
-  - '~'
-  - {t: ▽, type: trans}
-  - {t: '`', type: held alternate}
+  - ''
+  - Find
+  - Find Prev
+  - Find Next
+  Magic:
+  - BT Clear
+  - BRI DN
+  - BRI UP
+  - PREV
+  - NEXT
+  - PP
+  - MUTE
+  - VOL DN
+  - VOL UP
+  - ''
+  - ''
+  - BT Clear All
+  - Bootloader
   - ''
   - ''
   - ''
-  Mix:
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - Bootloader
+  - {t: Reset, type: held}
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
   - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - Reset
+  - USB Out
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - BT 0
+  - BT 1
+  - BT 2
+  Keypad:
+  - ''
   - F1
   - F2
   - F3
@@ -167,258 +218,44 @@ layers:
   - F10
   - F11
   - {t: ▽, type: trans}
-  - '5'
-  - '4'
-  - '3'
-  - '2'
-  - '1'
-  - BSPC
-  - '-'
-  - '='
-  - +
-  - '"'
-  - F12
-  - {t: ▽, type: trans}
-  - '6'
-  - '7'
-  - '8'
-  - '9'
-  - '0'
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - TAB
-  - INS
+  - ''
   - HOME
-  - END
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - ''
-  - ''
-  - ''
-  - TAB
-  - {t: ▽, type: trans}
-  - BACKSPACE
-  - {t: ▽, type: trans}
-  - {type: held}
-  - '3'
-  - ''
-  - ''
-  - ''
-  Adjust:
-  - BT Clear
-  - BT 0
-  - BT 1
-  - BT 2
-  - BT 3
-  - BT 4
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - BT Disc 0
-  - BT Disc 1
-  - BT Disc 2
-  - BT Disc 3
-  - BT Disc 4
-  - Win Toggle
-  - Base
-  - ''
-  - ''
-  - ''
-  - Win Toggle
-  - {t: BT Clear All, type: held}
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - ''
-  - ''
-  - ''
-  - ''
-  - Ext Power
-  - CAPSLOCK
-  - ''
-  - ''
-  - ''
-  - ''
-  - {type: held alternate}
-  - ''
-  - ''
-  - {type: held alternate}
-  - {t: '4', type: held alternate}
-  - ''
-  - ''
-  - ''
-  Navi:
-  - ''
-  - ''
-  - ''
-  - Mouse Up
-  - PAGE UP
-  - PAGE DOWN
-  - Left Click
-  - Middle Click
-  - Right Click
-  - Scroll Up
-  - Scroll Down
-  - ''
-  - ''
-  - ''
-  - Mouse Left
-  - Mouse Down
-  - Mouse Right
-  - Scroll Up
-  - LEFT
-  - DOWN
   - UP
-  - RIGHT
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - Scroll Down
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - Debug
-  - {t: ▽, type: trans}
-  - {type: held}
-  - ''
-  - ''
-  - '5'
-  - ''
-  - ''
-  - ''
-  NumPad:
-  - Debug
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
+  - END
+  - PG UP
   - KP 7
   - KP 8
   - KP 9
   - KP MINUS
-  - KP MULTIPLY
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
+  - KP SLASH
+  - F12
+  - Magic
+  - Undo
+  - Cut
+  - Copy
+  - Paste
+  - Paste Match
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
   - KP 4
   - KP 5
   - KP 6
   - KP PLUS
-  - KP DIVIDE
+  - KP MULTIPLY
+  - Base
   - ''
   - ''
   - ''
-  - ''
-  - ''
-  - ''
-  - ''
+  - Symbol
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - KP 0
   - KP 1
   - KP 2
   - KP 3
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - {type: held}
-  - ''
-  - Debug
-  - KP 0
+  - KP ENTER
   - KP DOT
-  - KP 0
-  - ''
-  - ''
-  - ''
-  Debug:
-  - {t: BT Clear, type: held alternate}
-  - BT 0
-  - BT 1
-  - BT 2
-  - BT 3
-  - BT 4
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - Bootloader
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - Bootloader
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - {type: held}
-  - ''
-  - {type: held}
-  - ''
-  - ''
-  - '7'
-  - ''
-  - ''
-  - ''
+  - BSPC
 combos:
-- p: [2, 4]
-  k: ESC
-  l: [Base, Windows]
-- p: [14, 16]
-  k: TAB
-  l: [Base, Windows]
-- p: [21, 19]
+- p: [20, 21]
   k: RET
-  l: [Base, Windows]
-- p: [5, 6]
-  k: '3'
-- p: [5, 6]
-  k: '4'
+  l: [Base]
