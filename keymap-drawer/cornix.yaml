@@ -180,9 +180,9 @@ layers:
   - Bootloader
   - {t: Reset, type: held}
   - ''
-  - ''
-  - ''
-  - ''
+  - BT 0
+  - BT 1
+  - BT 2
   - ''
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -201,9 +201,9 @@ layers:
   - ''
   - ''
   - ''
-  - BT 0
-  - BT 1
-  - BT 2
+  - ''
+  - ''
+  - ''
   Keypad:
   - ''
   - F1
