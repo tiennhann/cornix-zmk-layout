@@ -1,5 +1,11 @@
 # ZMK Keyboard for Cornix
 
+## Keymap
+
+![Cornix keymap](keymap-drawer/cornix.svg)
+
+Layout images are generated automatically by [keymap-drawer](https://github.com/caksoylar/keymap-drawer) whenever `config/cornix.keymap` changes. Locally: `just draw` (requires `pipx install keymap-drawer`).
+
 ## Introduction to Boards and Shields
 
 This repository contains the ZMK firmware configuration for the Cornix split keyboard. Below is an explanation of the different boards and shields available in this project:

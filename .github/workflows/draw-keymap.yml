@@ -1,0 +1,26 @@
+name: Draw keymap
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "config/*.keymap"
+      - "config/*.dtsi"
+      - "config/*.json"
+      - "config/includes/**"
+      - "keymap_drawer.config.yaml"
+      - ".github/workflows/draw-keymap.yml"
+
+jobs:
+  draw:
+    uses: caksoylar/keymap-drawer/.github/workflows/draw-zmk.yml@main
+    permissions:
+      contents: write
+    with:
+      keymap_patterns: "config/cornix.keymap"
+      config_path: "keymap_drawer.config.yaml"
+      # Fetch west modules (zmk-helpers) so #includes resolve during parse
+      west_config_path: "config"
+      output_folder: "keymap-drawer"
+      # Physical layout comes from config/cornix.json (auto-discovered)
+      draw_args: "cornix:'-l LAYOUT_50'"

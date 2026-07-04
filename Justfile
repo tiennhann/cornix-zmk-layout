@@ -1,11 +1,12 @@
 default:
     @just --list --unsorted
 
-config := absolute_path('config2')
+config := absolute_path('config')
 build := absolute_path('.build')
 out := absolute_path('firmware')
-draw := absolute_path('draw')
+draw := absolute_path('keymap-drawer')
 kb := absolute_path('kb')
+
 
 ## you should set ZMK_LIB_PREFIX to your zmk lib path's parent directory
 module_base := "${ZMK_LIB_PREFIX:=zmk_exts}"
@@ -112,19 +113,20 @@ clean-all: clean
 clean-nix:
     nix-collect-garbage --delete-old
 
-# parse & plot keymap
-draw keyboard: 
+# parse & plot keymap (requires keymap-drawer: pipx install keymap-drawer)
+# usage: just draw cornix
+draw keyboard="cornix":
     #!/usr/bin/env bash
     set -euo pipefail
-    echo "generated yaml"     
-    set -x
-    ## should use -z for zmk keyboards
-    keymap -c "{{ draw }}/config-{{ keyboard }}.yaml" parse -z "{{ config }}/{{ keyboard }}.keymap" --virtual-layers Combos >"{{ draw }}/{{ keyboard }}.yaml"
-    KBOARD=`yq -r '.layout."zmk_keyboard"' {{ draw }}/{{ keyboard }}.yaml`
-    echo "found zmk keyboard name : ${KBOARD}"
-    #yq -Yi '.combos.[].l = ["Combos"]' "{{ draw }}/{{ keyboard }}.yaml"
-    echo "generated svg for ${KBOARD}"     
-    keymap -c "{{ draw }}/config-{{ keyboard }}.yaml" draw "{{ draw }}/{{ keyboard }}.yaml" -z "${KBOARD}" >"{{ draw }}/{{ keyboard }}.svg"
+    mkdir -p "{{ draw }}"
+    echo "parsing {{ keyboard }}.keymap..."
+    keymap -c keymap_drawer.config.yaml parse -z "{{ config }}/{{ keyboard }}.keymap" >"{{ draw }}/{{ keyboard }}.yaml"
+    echo "drawing {{ keyboard }}.svg..."
+    keymap -c keymap_drawer.config.yaml draw "{{ draw }}/{{ keyboard }}.yaml" \
+        -j "{{ config }}/{{ keyboard }}.json" -l LAYOUT_50 \
+        >"{{ draw }}/{{ keyboard }}.svg"
+    echo "wrote {{ draw }}/{{ keyboard }}.svg"
+
 
 # initialize west
 init:

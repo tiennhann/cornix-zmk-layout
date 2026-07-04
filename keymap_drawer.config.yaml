@@ -1,0 +1,53 @@
+draw_config:
+  svg_extra_style: |
+    /* Target layer: the auto-detected "held" activator key gets an amber fill
+       (overrides keymap-drawer's default red #fdd). This shows, on each layer,
+       which key you hold to keep that layer active. */
+    rect.held, rect.combo.held {
+        fill: #ffd166;
+    }
+    /* Base layer: legends of keys that activate a layer are drawn in bold amber
+       so the entry points stand out on the Base map too. */
+    .layer-activator {
+        fill: #c8860a;
+        font-weight: bold;
+    }
+
+parse_config:
+  # Mark ALL key sequences that reach a layer as "held" (amber), not just the
+  # first — e.g. Symbols is reachable from both &mo 2 and &lt 2 BACKSPACE.
+  mark_alternate_layer_activators: true
+  # NOTE: keys listed in raw_binding_map are NOT auto-detected as layer
+  # activators, so they would lose the "held" highlight on the target layer.
+  # Leave momentary activators (&mo / &lt) OUT of this map so keymap-drawer
+  # marks them amber on the target layers and links their legends.
+  raw_binding_map:
+    # Layer toggles / jumps (not momentary holds)
+    "&to 0": Base
+    "&tog 1": Win Toggle
+    # Firmware / power
+    "&bootloader": Bootloader
+    "&ext_power EP_ON": Ext Power
+    # Bluetooth
+    "&bt BT_CLR": BT Clear
+    "&bt BT_CLR_ALL": BT Clear All
+    "&bt BT_SEL 0": BT 0
+    "&bt BT_SEL 1": BT 1
+    "&bt BT_SEL 2": BT 2
+    "&bt BT_SEL 3": BT 3
+    "&bt BT_SEL 4": BT 4
+    "&bt BT_DISC 0": BT Disc 0
+    "&bt BT_DISC 1": BT Disc 1
+    "&bt BT_DISC 2": BT Disc 2
+    "&bt BT_DISC 3": BT Disc 3
+    "&bt BT_DISC 4": BT Disc 4
+    # Mouse (Navi layer)
+    "&mkp MB1": Left Click
+    "&mkp MB2": Right Click
+    "&mkp MB3": Middle Click
+    "&mmv MOVE_UP": Mouse Up
+    "&mmv MOVE_DOWN": Mouse Down
+    "&mmv MOVE_LEFT": Mouse Left
+    "&mmv MOVE_RIGHT": Mouse Right
+    "&msc SCRL_UP": Scroll Up
+    "&msc SCRL_DOWN": Scroll Down
