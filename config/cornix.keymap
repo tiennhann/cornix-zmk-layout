@@ -241,7 +241,7 @@
         compatible = "zmk,keymap";
 
         // Cornix has no number row; alpha + thumbs only.
-        // Thumbs (go60-style): BSPC Symbol Ctrl | Alt Nav Space
+        // Thumbs: Ctrl Bspc Symbol | Nav Space Alt
         // Palms: Grave Del Gui | [ ] -
         layer_Base {
             display-name = "Base";
@@ -249,7 +249,7 @@
 &kp TAB             &kp Q              &kp W            &kp E              &kp R             &kp T                        &kp Y      &kp U               &kp I             &kp O            &kp P              &kp BSLH
 &kp ESC             &hml_pinky LCTRL A &hml_ring LALT S &hml_middle LGUI D &hml_index LSHFT F &kp G                        &kp H      &hmr_index RSHFT J  &hmr_middle RGUI K &hmr_ring LALT L &hmr_pinky RCTRL SEMI &kp SQT
 &mo LAYER_Magic     &kp Z              &kp X            &kp C              &kp V             &kp B         &none  &none  &kp N      &kp M               &kp COMMA         &kp DOT          &kp FSLH           &keypad_td
-&kp GRAVE           &kp DEL            &kp LGUI         &kp BSPC           &mo LAYER_Symbol  &kp LCTRL                    &kp LALT   &mo LAYER_Nav       &kp SPACE         &kp LBKT         &kp RBKT           &kp MINUS
+&kp GRAVE           &kp DEL            &kp LGUI         &kp LCTRL          &kp BSPC          &mo LAYER_Symbol              &mo LAYER_Nav &kp SPACE         &kp LALT          &kp LBKT         &kp RBKT           &kp MINUS
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
@@ -262,7 +262,7 @@
 &kp CAPS  &kp EXCL  &kp AT     &kp HASH  &kp DLLR  &kp PRCNT                  &kp CARET  &kp AMPS  &kp STAR  &kp LPAR  &kp RPAR  &kp TILDE
 &none     &kp N1    &kp N2     &kp N3    &kp N4    &kp N5                     &kp N6     &kp N7    &kp N8    &kp N9    &kp N0    &kp GRAVE
 &none     &none     &kp MINUS  &kp PLUS  &kp UNDER &kp EQUAL   &trans  &trans  &kp LBKT   &kp RBKT  &kp LBRC  &kp RBRC  &none     &none
-&none     &none     &none      &trans    &trans    &none                      &none      &none     &none     &none     &none     &none
+&none     &none     &none      &none     &none     &trans                     &none      &none     &none     &none     &none     &none
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
@@ -282,7 +282,7 @@
 &none  &kp LC(LS(TAB)) &kp LC(TAB)     &none           &kp LG(LBKT)    &kp LG(RBKT)                   &kp PG_UP  &kp HOME          &kp UP    &kp END       &search_selected    &none
 &none  &none           &mmv MOVE_LEFT  &mmv MOVE_DOWN  &mmv MOVE_RIGHT &msc SCRL_UP                   &kp PG_DN  &kp LEFT          &kp DOWN  &kp RIGHT     &kp LC(LG(LS(N4))) &none
 &none  &none           &none           &mmv MOVE_UP    &kp PG_UP       &kp PG_DN       &trans  &trans  &none      &select_word_back &select_word &select_line &kp LC(LG(LS(N3))) &none
-&none  &none           &none           &mkp LCLK       &mkp RCLK       &mkp MCLK                      &none      &trans            &none     &kp LG(F)     &kp LG(LS(G))       &kp LG(G)
+&none  &none           &none           &mkp LCLK       &mkp RCLK       &mkp MCLK                      &trans     &none             &none     &kp LG(F)     &kp LG(LS(G))       &kp LG(G)
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
