@@ -120,6 +120,10 @@ BUILD_ASSERT(!(SHOW_LAYER_CHANGE && SHOW_LAYER_COLORS),
 static const char *color_names[] = {"black", "red",     "green", "yellow",
                                     "blue",  "magenta", "cyan",  "white"};
 
+#if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
+static uint8_t get_battery_color(uint8_t battery_level);
+#endif
+
 #if SHOW_LAYER_COLORS
 static const uint8_t layer_color_idx[] = {
     CONFIG_RGBLED_WIDGET_LAYER_0_COLOR,  CONFIG_RGBLED_WIDGET_LAYER_1_COLOR,
@@ -503,19 +507,23 @@ static int indicate_connectivity_ws2812(void) {
     pattern.type = ANIM_STATIC;
     
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    switch (zmk_endpoints_selected().transport) {
+    switch (zmk_endpoint_get_selected().transport) {
     case ZMK_TRANSPORT_USB:
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_CONN_SHOW_USB)
         color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_USB;
         LOG_INF("Enhanced USB connection indication");
         break;
 #endif
-    default: // ZMK_TRANSPORT_BLE
+    case ZMK_TRANSPORT_BLE:
 #if IS_ENABLED(CONFIG_ZMK_BLE)
-        if (zmk_ble_active_profile_is_connected()) {
-            color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
-            LOG_INF("BLE connected indication");
-        } else if (zmk_ble_active_profile_is_open()) {
+        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
+        LOG_INF("BLE connected indication");
+#endif
+        break;
+    default:
+#if IS_ENABLED(CONFIG_ZMK_BLE)
+        if (zmk_endpoint_get_preferred_transport() != ZMK_TRANSPORT_NONE &&
+            zmk_ble_active_profile_is_open()) {
             color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_ADVERTISING;
             pattern.type = ANIM_PULSE;
             pattern.period_ms = 2000;
@@ -608,9 +616,36 @@ static int indicate_battery_enhanced(void) {
 }
 
 static int indicate_connectivity_enhanced(void) {
-    // Use existing connectivity logic to determine color
-    // This is a simplified version - full implementation would need refactoring
-    return set_status_led(STATUS_CONNECTIVITY, CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED, 0, true);
+    uint8_t color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_DISCONNECTED;
+
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    switch (zmk_endpoint_get_selected().transport) {
+    case ZMK_TRANSPORT_USB:
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_CONN_SHOW_USB)
+        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_USB;
+#endif
+        break;
+    case ZMK_TRANSPORT_BLE:
+#if IS_ENABLED(CONFIG_ZMK_BLE)
+        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
+#endif
+        break;
+    default:
+#if IS_ENABLED(CONFIG_ZMK_BLE)
+        if (zmk_endpoint_get_preferred_transport() != ZMK_TRANSPORT_NONE &&
+            zmk_ble_active_profile_is_open()) {
+            color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_ADVERTISING;
+        }
+#endif
+        break;
+    }
+#elif IS_ENABLED(CONFIG_ZMK_SPLIT_BLE)
+    if (zmk_split_bt_peripheral_is_connected()) {
+        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
+    }
+#endif
+
+    return set_status_led(STATUS_CONNECTIVITY, color_idx, 0, true);
 }
 
 static int indicate_layer_enhanced(bool use_shared) {
@@ -911,32 +946,38 @@ K_MSGQ_DEFINE(led_msgq, sizeof(struct blink_item), 16, 1);
 
 static void indicate_connectivity_internal(void) {
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
-    // Use enhanced connectivity indication for WS2812
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_ANIMATIONS)
     indicate_connectivity_ws2812();
+#else
+    indicate_connectivity_enhanced();
+#endif
     return;
 #else
     // Original implementation for GPIO LEDs and simple WS2812
     struct blink_item blink = {.duration_ms = CONFIG_RGBLED_WIDGET_CONN_BLINK_MS};
 
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    switch (zmk_endpoints_selected().transport) {
+    switch (zmk_endpoint_get_selected().transport) {
     case ZMK_TRANSPORT_USB:
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_CONN_SHOW_USB)
         LOG_INF("USB connected, blinking %s", color_names[CONFIG_RGBLED_WIDGET_CONN_COLOR_USB]);
         blink.color = CONFIG_RGBLED_WIDGET_CONN_COLOR_USB;
         break;
 #endif
-    default: // ZMK_TRANSPORT_BLE
+    case ZMK_TRANSPORT_BLE:
 #if IS_ENABLED(CONFIG_ZMK_BLE)
-        uint8_t profile_index = zmk_ble_active_profile_index();
-        if (zmk_ble_active_profile_is_connected()) {
-            LOG_CONN_CENTRAL(profile_index, "connected", CONNECTED);
-            blink.color = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
-        } else if (zmk_ble_active_profile_is_open()) {
-            LOG_CONN_CENTRAL(profile_index, "open", ADVERTISING);
+        LOG_CONN_CENTRAL(zmk_ble_active_profile_index(), "connected", CONNECTED);
+        blink.color = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
+#endif
+        break;
+    default:
+#if IS_ENABLED(CONFIG_ZMK_BLE)
+        if (zmk_endpoint_get_preferred_transport() != ZMK_TRANSPORT_NONE &&
+            zmk_ble_active_profile_is_open()) {
+            LOG_CONN_CENTRAL(zmk_ble_active_profile_index(), "open", ADVERTISING);
             blink.color = CONFIG_RGBLED_WIDGET_CONN_COLOR_ADVERTISING;
         } else {
-            LOG_CONN_CENTRAL(profile_index, "not connected", DISCONNECTED);
+            LOG_CONN_CENTRAL(zmk_ble_active_profile_index(), "not connected", DISCONNECTED);
             blink.color = CONFIG_RGBLED_WIDGET_CONN_COLOR_DISCONNECTED;
         }
 #endif
