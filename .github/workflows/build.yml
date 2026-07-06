@@ -9,6 +9,7 @@ on:
     paths:
       - "boards/**"
       - "config/**"
+      - "modules/**"
       - "build.yaml"
       - ".github/workflows/build.yml"
     tags-ignore:
