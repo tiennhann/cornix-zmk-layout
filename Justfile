@@ -6,6 +6,7 @@ build := absolute_path('.build')
 out := absolute_path('firmware')
 draw := absolute_path('keymap-drawer')
 kb := absolute_path('kb')
+rgbled_module := absolute_path('modules/zmk-rgbled-widget')
 
 
 ## you should set ZMK_LIB_PREFIX to your zmk lib path's parent directory
@@ -48,7 +49,7 @@ _parse_targets $expr:
 
 # build firmware for single board & shield combination
 # TODO use artifact
-_build_single $board $shield $snippet $artifact *west_args:
+_build_single $board $shield $snippet $artifact *extra_cmake *west_args:
     #!/usr/bin/env bash
     set -euo pipefail
 
@@ -63,9 +64,9 @@ _build_single $board $shield $snippet $artifact *west_args:
 
     build_dir="{{ build / '$artifact' }}"
 
-    CMAKE_ARGS=""
+    CMAKE_ARGS="{{ extra_cmake }}"
 
-    if [[ -f zephyr/module.yml ]] ; then
+    if [[ -f zephyr/module.yml ]] && [[ "$CMAKE_ARGS" != *ZMK_EXTRA_MODULES* ]]; then
         module_path_ext="$(pwd)/"
         echo "Found local module $module_path_ext, append to west build command"
         export ZMK_EXTRA_MODULES=$(pwd)
@@ -98,8 +99,19 @@ build expr *west_args: _parse_combos
 
     [[ -z $targets ]] && echo "No matching targets found. Aborting..." >&2 && exit 1
     echo "$targets" | while IFS="," read -r board shield snippet artifact; do
-        just _build_single "$board" "$shield" "$snippet" "$artifact" {{ west_args }}
+        just _build_single "$board" "$shield" "$snippet" "$artifact" "" {{ west_args }}
     done
+
+# Build optional RGB indicator firmware (higher power use than default builds)
+indicator: indicator-left indicator-right
+
+indicator-left:
+    just _build_single cornix_left cornix_indicator "" cornix_left_indicator_nosd \
+        "-DZMK_EXTRA_MODULES=$(pwd);{{ rgbled_module }}"
+
+indicator-right:
+    just _build_single cornix_right cornix_indicator "" cornix_right_indicator_nosd \
+        "-DZMK_EXTRA_MODULES=$(pwd);{{ rgbled_module }}"
 
 # clear build cache and artifacts
 clean:

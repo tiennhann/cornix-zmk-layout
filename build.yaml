@@ -20,8 +20,8 @@ include:
     snippet: studio-rpc-usb-uart nrf52840-nosd
     artifact-name: cornix_dongle_nosd
 
-  # cornix_indicator needs zmk-rgbled-widget; that module currently breaks CI
-  # on ZMK main. Shield files are kept under boards/shields/cornix_indicator/.
+  # Optional RGB indicator firmware (higher power). Default targets above stay RGB-free.
+  # Module is vendored at modules/zmk-rgbled-widget (not in west.yml).
   - board: cornix_left
     # shield: cornix_indicator
     artifact-name: cornix_left_default_nosd
@@ -33,6 +33,22 @@ include:
   - board: cornix_right
     # shield: cornix_indicator
     artifact-name: cornix_right_nosd
+
+  # Optional RGB indicator firmware (higher power use). Default builds above stay RGB-free.
+  - board: cornix_left
+    shield: cornix_indicator
+    artifact-name: cornix_left_indicator_nosd
+    cmake-args: -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE};${GITHUB_WORKSPACE}/modules/zmk-rgbled-widget"
+
+  - board: cornix_ph_left
+    shield: cornix_indicator
+    artifact-name: cornix_left_for_dongle_indicator_nosd
+    cmake-args: -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE};${GITHUB_WORKSPACE}/modules/zmk-rgbled-widget"
+
+  - board: cornix_right
+    shield: cornix_indicator
+    artifact-name: cornix_right_indicator_nosd
+    cmake-args: -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE};${GITHUB_WORKSPACE}/modules/zmk-rgbled-widget"
 
   - board: cornix_right
     shield: settings_reset

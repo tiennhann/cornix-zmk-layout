@@ -1,0 +1,7 @@
+name: zmk-rgbled-widget
+build:
+  cmake: .
+  kconfig: Kconfig
+  settings:
+    # board_root omitted — Cornix uses its own cornix_indicator shield in this repo.
+    dts_root: .

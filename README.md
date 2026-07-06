@@ -54,14 +54,27 @@ you have two solutions
 - [x] no-SD image, since v2.3
 - [x] support various of dongles
 - [x] upgrade to zephyr4.1 and lvgl9 , since v2.7, no dongle screen support yet
-- [ ] RGB status indicators (`cornix_indicator` shield is ready; blocked on zmk-rgbled-widget + current ZMK main)
+- [x] RGB status indicators (optional `*_indicator_nosd` artifacts; default builds stay RGB-free)
 
 
 ### about RGB
 
-Cornix has 2 RGB LEDs per half. Stock firmware uses them for **battery** and **Bluetooth/connection** status.
+Cornix has 2 RGB LEDs per half. Stock RMK firmware uses them for **battery** and **Bluetooth/connection** status.
 
-The `cornix_indicator` shield (WS2812 over SPI, LED0=battery, LED1=connection) is in the tree, but enabling [hitsmaxft/zmk-rgbled-widget](https://github.com/hitsmaxft/zmk-rgbled-widget) currently breaks **all** GitHub Actions builds on ZMK `main` — including targets that do not use the shield (settings reset, dongle). Until that module works with current ZMK, indicators stay disabled in `build.yaml` / `west.yml`.
+This repo drives them with the `cornix_indicator` shield (WS2812 over SPI) and a vendored copy of [hitsmaxft/zmk-rgbled-widget](https://github.com/hitsmaxft/zmk-rgbled-widget) under `modules/zmk-rgbled-widget/`:
+
+| LED | Meaning |
+|-----|---------|
+| 0 | Battery (green / yellow / red; blinks when critical) |
+| 1 | Connection (blue paired, yellow advertising, red disconnected, cyan USB) |
+
+**Default firmware has no RGB** (lower battery use). To use indicators:
+
+1. Download `cornix_left_indicator_nosd.uf2` and `cornix_right_indicator_nosd.uf2` from GitHub Actions artifacts, **or** build locally: `just indicator`
+2. Flash **both halves**
+3. LEDs turn off during idle (30s) and sleep to save power; brightness is capped in `cornix_indicator.conf`
+
+Indicators use more power than the default build because the LED rail stays powered while active.
 
 ## Supported Hardware: Cornix Split Keyboard
 

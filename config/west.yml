@@ -21,8 +21,9 @@ manifest:
       remote: urob
       revision: main
       clone-depth: 1
-    # zmk-rgbled-widget (hitsmaxft) currently breaks all CI builds on ZMK main
-    # (even targets that do not use cornix_indicator). Re-enable when fixed.
+    # zmk-rgbled-widget is vendored under modules/zmk-rgbled-widget (not in west.yml —
+    # global west import breaks all builds). Loaded only for indicator targets via
+    # cmake-args in build.yaml.
     # - name: zmk-rgbled-widget
     #   remote: hitsmaxft
     #   revision: main
