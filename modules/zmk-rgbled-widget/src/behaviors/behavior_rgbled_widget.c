@@ -1,6 +1,7 @@
 #define DT_DRV_COMPAT zmk_behavior_rgbled_widget
 
 #include <zephyr/device.h>
+#include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
 #include <zmk/behavior.h>
@@ -28,6 +29,13 @@ static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
     }
 
     const struct behavior_rgb_wdg_config *cfg = dev->config;
+
+    LOG_DBG("rgbled-widget pressed: bat %d con %d lyr %d", cfg->indicate_battery,
+            cfg->indicate_connectivity, cfg->indicate_layer);
+
+#if IS_ENABLED(CONFIG_ZMK_EXT_POWER)
+    k_sleep(K_MSEC(55));
+#endif
 
 #if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
     if (cfg->indicate_battery) {

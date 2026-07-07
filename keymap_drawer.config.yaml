@@ -35,6 +35,7 @@ parse_config:
     "&out OUT_USB": USB Out
     "&bootloader": Bootloader
     "&sys_reset": Reset
+    "&show_status": LED Status
     "&bt BT_CLR": BT Clear
     "&bt BT_CLR_ALL": BT Clear All
     # Clipboard (macOS Cmd)

@@ -179,7 +179,7 @@ layers:
   - ''
   - Bootloader
   - {t: Reset, type: held}
-  - ''
+  - LED Status
   - BT 0
   - BT 1
   - BT 2

@@ -393,6 +393,8 @@ static int indicate_battery_apply(bool force, int16_t level_hint) {
 
     if (force) {
         widget_ensure_ext_power();
+        last_reported_battery_soc = 0xFF;
+        last_conn_color = 0xFF;
         if (level_hint == -2) {
             battery_level = read_battery_level_with_retry();
         } else {
