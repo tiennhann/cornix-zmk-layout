@@ -170,6 +170,19 @@ static uint8_t get_battery_color(uint8_t battery_level) {
     LOG_BATTERY(battery_level, LOW);
     return CONFIG_RGBLED_WIDGET_BATTERY_COLOR_LOW;
 }
+
+// ADC often returns 0 if sampled immediately after boot.
+static uint8_t read_battery_level_with_retry(void) {
+    uint8_t battery_level = zmk_battery_state_of_charge();
+    int retry = 0;
+
+    while (battery_level == 0 && retry++ < 10) {
+        k_sleep(K_MSEC(100));
+        battery_level = zmk_battery_state_of_charge();
+    }
+
+    return battery_level;
+}
 #endif
 
 // a blink work item as specified by the color and duration
@@ -474,17 +487,16 @@ static void update_all_animations(void) {
 
 // Enhanced status indication with patterns
 static int indicate_battery_enhanced(void) {
-    uint8_t battery_level = zmk_battery_state_of_charge();
+    uint8_t battery_level = read_battery_level_with_retry();
     uint8_t color_idx = 0;
     struct animation_state pattern = {0};
-    
+
     if (battery_level == 0) {
-        color_idx = CONFIG_RGBLED_WIDGET_BATTERY_COLOR_MISSING;
-        pattern.type = ANIM_BLINK;
-        pattern.period_ms = 1000;
-        pattern.start_color = color_idx;
-        pattern.end_color = 0; // Black
-    } else if (battery_level <= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL) {
+        LOG_INF("Battery level still undetermined after retry, skipping indication");
+        return 0;
+    }
+
+    if (battery_level <= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL) {
         color_idx = CONFIG_RGBLED_WIDGET_BATTERY_COLOR_CRITICAL;
         pattern.type = ANIM_PULSE;
         pattern.period_ms = 2000;
@@ -626,7 +638,13 @@ static int indicate_layer_enhanced(bool use_shared) {
 
 // Simplified versions without animations
 static int indicate_battery_enhanced(void) {
-    uint8_t battery_level = zmk_battery_state_of_charge();
+    uint8_t battery_level = read_battery_level_with_retry();
+
+    if (battery_level == 0) {
+        LOG_INF("Battery level still undetermined after retry, skipping indication");
+        return 0;
+    }
+
     uint8_t color_idx = get_battery_color(battery_level);
     return set_status_led(STATUS_BATTERY, color_idx, 0, true);
 }
@@ -1109,9 +1127,14 @@ static int led_battery_listener_cb(const zmk_event_t *eh) {
         return 0;
     }
 
-    // check if we are in critical battery levels at state change, blink if we are
     uint8_t battery_level = as_zmk_battery_state_changed(eh)->state_of_charge;
 
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
+    if (battery_level > 0) {
+        indicate_battery();
+    }
+#else
+    // check if we are in critical battery levels at state change, blink if we are
     if (battery_level > 0 && battery_level <= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL) {
         LOG_BATTERY(battery_level, CRITICAL);
 
@@ -1121,6 +1144,7 @@ static int led_battery_listener_cb(const zmk_event_t *eh) {
                     blink.duration_ms, battery_level);
         k_msgq_put(&led_msgq, &blink, K_NO_WAIT);
     }
+#endif
     return 0;
 }
 
@@ -1318,6 +1342,9 @@ extern void led_init_thread(void *d0, void *d1, void *d2) {
 
     // wait until blink should be displayed for further checks
     k_sleep(K_MSEC(CONFIG_RGBLED_WIDGET_BATTERY_BLINK_MS + CONFIG_RGBLED_WIDGET_INTERVAL_MS));
+
+    // ADC may have settled during the wait; sample again before connectivity.
+    indicate_battery();
 #endif // IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
 
     // check and indicate current profile or peripheral connectivity status
@@ -1330,6 +1357,12 @@ extern void led_init_thread(void *d0, void *d1, void *d2) {
 #endif // SHOW_LAYER_COLORS
 
     initialized = true;
+
+#if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
+    // Battery events during init were ignored while initialized was false.
+    indicate_battery();
+#endif // IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
+
     LOG_INF("Finished initializing LED widget");
 }
 
