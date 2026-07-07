@@ -6,6 +6,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
+#include <drivers/behavior.h>
 #include <zmk/behavior.h>
 
 #include <zmk_rgbled_widget/widget.h>
@@ -20,6 +21,7 @@ struct behavior_rgb_wdg_config {
 
 static int behavior_rgb_wdg_init(const struct device *dev) { return 0; }
 
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET)
 static bool binding_is_show_status(struct zmk_behavior_binding *binding) {
     if (binding->behavior_dev != NULL) {
         if (strcmp(binding->behavior_dev, "show_status") == 0 ||
@@ -61,6 +63,7 @@ static const struct device *behavior_rgb_wdg_get_device(struct zmk_behavior_bind
 
     return dev;
 }
+#endif // IS_ENABLED(CONFIG_RGBLED_WIDGET)
 
 static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
                                      struct zmk_behavior_binding_event event) {
