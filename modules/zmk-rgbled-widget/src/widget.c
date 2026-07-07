@@ -14,6 +14,9 @@
 #include <zmk/battery.h>
 #include <zmk/ble.h>
 #include <zmk/endpoints.h>
+#if IS_ENABLED(CONFIG_ZMK_EXT_POWER)
+#include <zmk/ext_power.h>
+#endif
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/endpoint_changed.h>
@@ -184,10 +187,33 @@ static uint8_t read_battery_level_with_retry(void) {
     return battery_level;
 }
 
+// Short retry for on-demand keymap triggers (avoid blocking the key thread).
+static uint8_t read_battery_level_quick(void) {
+    uint8_t battery_level = zmk_battery_state_of_charge();
+    int retry = 0;
+
+    while (battery_level == 0 && retry++ < 5) {
+        k_sleep(K_MSEC(50));
+        battery_level = zmk_battery_state_of_charge();
+    }
+
+    return battery_level;
+}
+
 static uint8_t last_reported_battery_soc = 0xFF;
 
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
 static int indicate_battery_apply(bool force, int16_t level_hint);
+
+static void widget_ensure_ext_power(void) {
+#if IS_ENABLED(CONFIG_ZMK_EXT_POWER)
+    const struct device *ext_power = zmk_ext_power_get();
+
+    if (ext_power != NULL) {
+        zmk_ext_power_enable(ext_power);
+    }
+#endif
+}
 #endif
 #endif
 
@@ -365,7 +391,12 @@ static int indicate_battery_apply(bool force, int16_t level_hint) {
     uint8_t battery_level;
 
     if (force) {
-        battery_level = read_battery_level_with_retry();
+        widget_ensure_ext_power();
+        if (level_hint == -2) {
+            battery_level = read_battery_level_with_retry();
+        } else {
+            battery_level = read_battery_level_quick();
+        }
     } else if (level_hint >= 0) {
         battery_level = (uint8_t)level_hint;
     } else {
@@ -788,7 +819,11 @@ static int ws2812_set_led(uint8_t led_index, uint8_t color_idx) {
         LOG_ERR("LED index %d out of range (max %d)", led_index, CONFIG_RGBLED_WIDGET_LED_COUNT - 1);
         return -EINVAL;
     }
-    
+
+    if (color_idx > 0) {
+        widget_ensure_ext_power();
+    }
+
     color_index_to_rgb(color_idx, &led_colors[led_index]);
     led_states[led_index].current_color = color_idx;
     
@@ -1068,9 +1103,11 @@ static void indicate_connectivity_internal(bool force) {
 }
 
 static int led_output_listener_cb(const zmk_event_t *eh) {
-    if (initialized) {
-        indicate_connectivity();
+    ARG_UNUSED(eh);
+    if (!initialized) {
+        return 0;
     }
+    indicate_connectivity();
     return 0;
 }
 
@@ -1167,6 +1204,9 @@ static int led_battery_listener_cb(const zmk_event_t *eh) {
     if (!initialized) {
         return 0;
     }
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_ON_DEMAND_ONLY)
+    return 0;
+#endif
 
     uint8_t battery_level = as_zmk_battery_state_changed(eh)->state_of_charge;
 
@@ -1195,7 +1235,8 @@ ZMK_LISTENER(led_battery_listener, led_battery_listener_cb);
 ZMK_SUBSCRIPTION(led_battery_listener, zmk_battery_state_changed);
 #endif // IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
 
-#if IS_ENABLED(CONFIG_RGBLED_WIDGET_IDLE_LED_OFF) && IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812) &&                                                  \
+    (IS_ENABLED(CONFIG_RGBLED_WIDGET_IDLE_LED_OFF) || IS_ENABLED(CONFIG_RGBLED_WIDGET_ON_DEMAND_ONLY))
 static int led_idle_listener_cb(const zmk_event_t *eh) {
     struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
 
@@ -1213,6 +1254,7 @@ static int led_idle_listener_cb(const zmk_event_t *eh) {
         last_reported_battery_soc = 0xFF;
 #endif
         break;
+#if !IS_ENABLED(CONFIG_RGBLED_WIDGET_ON_DEMAND_ONLY)
     case ZMK_ACTIVITY_ACTIVE:
         LOG_INF("Active: restore indicator LEDs");
 #if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
@@ -1222,6 +1264,7 @@ static int led_idle_listener_cb(const zmk_event_t *eh) {
         indicate_connectivity_force();
 #endif
         break;
+#endif
     default:
         break;
     }
@@ -1231,7 +1274,7 @@ static int led_idle_listener_cb(const zmk_event_t *eh) {
 
 ZMK_LISTENER(led_idle_listener, led_idle_listener_cb);
 ZMK_SUBSCRIPTION(led_idle_listener, zmk_activity_state_changed);
-#endif // RGBLED_WIDGET_IDLE_LED_OFF && RGBLED_WIDGET_WS2812
+#endif // idle LED off or on-demand only
 
 uint8_t led_layer_color = 0;
 #if SHOW_LAYER_COLORS
@@ -1415,21 +1458,36 @@ extern void led_init_thread(void *d0, void *d1, void *d2) {
 #endif
 
 #if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
-    // check and indicate battery level on thread start
     LOG_INF("Indicating initial battery status");
 
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_ON_DEMAND_ONLY)
+    indicate_battery_apply(true, -2);
+    indicate_connectivity_force();
+    k_sleep(K_MSEC(CONFIG_RGBLED_WIDGET_BATTERY_BLINK_MS + CONFIG_RGBLED_WIDGET_INTERVAL_MS));
+    ws2812_clear_all();
+    last_conn_color = 0xFF;
+    last_reported_battery_soc = 0xFF;
+#else
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
+    indicate_battery_apply(true, -2);
+#else
     indicate_battery();
+#endif
 
-    // wait until blink should be displayed for further checks
     k_sleep(K_MSEC(CONFIG_RGBLED_WIDGET_BATTERY_BLINK_MS + CONFIG_RGBLED_WIDGET_INTERVAL_MS));
 
-    // ADC may have settled during the wait; sample again before connectivity.
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
+    indicate_battery_apply(true, -2);
+#else
     indicate_battery();
-#endif // IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
+#endif
+#endif // ON_DEMAND_ONLY
+#endif // ZMK_BATTERY_REPORTING
 
-    // check and indicate current profile or peripheral connectivity status
     LOG_INF("Indicating initial connectivity status");
+#if !IS_ENABLED(CONFIG_RGBLED_WIDGET_ON_DEMAND_ONLY)
     indicate_connectivity_force();
+#endif
 
 #if SHOW_LAYER_COLORS
     LOG_INF("Setting initial layer color");
@@ -1438,10 +1496,14 @@ extern void led_init_thread(void *d0, void *d1, void *d2) {
 
     initialized = true;
 
-#if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
+#if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING) && !IS_ENABLED(CONFIG_RGBLED_WIDGET_ON_DEMAND_ONLY)
     // Battery events during init were ignored while initialized was false.
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
+    indicate_battery_apply(true, -2);
+#else
     indicate_battery();
-#endif // IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
+#endif
+#endif // ZMK_BATTERY_REPORTING && !ON_DEMAND_ONLY
 
     LOG_INF("Finished initializing LED widget");
 }

@@ -6,6 +6,8 @@
     };
 };
 
+#include <behaviors/rgbled_widget.dtsi>
+
 / {
     EXT_POWER {
         status = "okay";

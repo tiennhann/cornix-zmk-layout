@@ -21,6 +21,12 @@ static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
                                      struct zmk_behavior_binding_event event) {
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET)
     const struct device *dev = zmk_behavior_get_binding(binding->behavior_dev);
+
+    if (dev == NULL) {
+        LOG_WRN("rgbled-widget behavior not found in devicetree");
+        return ZMK_BEHAVIOR_OPAQUE;
+    }
+
     const struct behavior_rgb_wdg_config *cfg = dev->config;
 
 #if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
@@ -51,7 +57,7 @@ static int on_keymap_binding_released(struct zmk_behavior_binding *binding,
 static const struct behavior_driver_api behavior_rgb_wdg_driver_api = {
     .binding_pressed = on_keymap_binding_pressed,
     .binding_released = on_keymap_binding_released,
-    .locality = BEHAVIOR_LOCALITY_GLOBAL,
+    .locality = BEHAVIOR_LOCALITY_EVENT_SOURCE,
 #if IS_ENABLED(CONFIG_ZMK_BEHAVIOR_METADATA)
     .get_parameter_metadata = zmk_behavior_get_empty_param_metadata,
 #endif // IS_ENABLED(CONFIG_ZMK_BEHAVIOR_METADATA)

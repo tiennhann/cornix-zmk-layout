@@ -202,6 +202,16 @@ config RGBLED_WIDGET_IDLE_LED_OFF
     help
       When enabled, clears status LEDs on idle/sleep and restores them on
       the next key press (pairs with ZMK ext-power idle behavior).
+      Ignored when RGBLED_WIDGET_ON_DEMAND_ONLY is enabled.
+
+config RGBLED_WIDGET_ON_DEMAND_ONLY
+    bool "Only show battery LED at boot and via keymap behaviors"
+    default n
+    depends on RGBLED_WIDGET_WS2812
+    help
+      Battery LED is shown during boot and when &ind_bat runs, then turned
+      off. Background battery events do not update LED 0. The connection LED
+      still follows BLE link changes. Waking from idle does not restore LEDs.
 
 config RGBLED_WIDGET_OUTPUT_BLINK_MS  # DEPRECATED, do not use
     int
