@@ -16,18 +16,14 @@ if RGBLED_WIDGET
 config RGBLED_WIDGET_WS2812
     bool "Use WS2812 addressable LEDs instead of GPIO LEDs"
     default n
+    select LED_STRIP
+    select WS2812_STRIP
     help
       Enable WS2812 (NeoPixel) addressable LED support with multi-LED
       capabilities, spatial mapping, animations, and LED sharing.
       When disabled, the original GPIO LED implementation is used.
 
 if RGBLED_WIDGET_WS2812
-
-config LED_STRIP
-    default y
-    
-config WS2812_STRIP
-    default y
 
 config RGBLED_WIDGET_LED_COUNT
     int "Number of LEDs in the strip"
