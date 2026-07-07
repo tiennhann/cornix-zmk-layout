@@ -205,13 +205,14 @@ config RGBLED_WIDGET_IDLE_LED_OFF
       Ignored when RGBLED_WIDGET_ON_DEMAND_ONLY is enabled.
 
 config RGBLED_WIDGET_ON_DEMAND_ONLY
-    bool "Only show indicator LEDs at boot and via keymap behaviors"
+    bool "Only show battery LED at boot and via keymap behaviors"
     default n
     depends on RGBLED_WIDGET_WS2812
     help
-      Status LEDs are shown during boot (~2.5s) and when &ind_bat, &ind_con, or
-      &show_status run, then cleared. Background battery and BLE events do not
-      update LEDs. Waking from idle does not restore LEDs.
+      Battery LED is shown during boot and when &ind_bat or &show_status run.
+      Background battery events do not update LED 0. The connection LED still
+      follows BLE profile and output changes. Waking from idle does not restore
+      the battery LED.
 
 config RGBLED_WIDGET_OUTPUT_BLINK_MS  # DEPRECATED, do not use
     int

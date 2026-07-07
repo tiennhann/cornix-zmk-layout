@@ -10,12 +10,6 @@
             #binding-cells = <0>;
             indicate-connectivity;
         };
-        /omit-if-no-ref/ show_status: show_status {
-            compatible = "zmk,behavior-rgbled-widget";
-            #binding-cells = <0>;
-            indicate-battery;
-            indicate-connectivity;
-        };
         /omit-if-no-ref/ ind_lyr: ind_lyr {
             compatible = "zmk,behavior-rgbled-widget";
             #binding-cells = <0>;

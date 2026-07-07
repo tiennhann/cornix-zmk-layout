@@ -189,6 +189,16 @@
                   <&bt BT_SEL 3>;
         };
 
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET)
+        // Magic layer Z: power LED rail, show battery + connection.
+        show_status: show_status {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <55>;
+            bindings = <&ext_power EP_ON>, <&ind_bat>, <&ind_con>;
+        };
+#endif
+
         // macOS "select whole line": jump to line start, then select to line end.
         select_line: select_line {
             compatible = "zmk,behavior-macro";
