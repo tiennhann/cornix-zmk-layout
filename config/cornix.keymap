@@ -13,7 +13,12 @@
 
 #include "includes/cornix54.h"
 
-// rgbled_widget.dtsi is included via cornix_indicator shield overlay.
+// RGB status behaviors (&show_status etc). The module is passed to every build
+// via ZMK_EXTRA_MODULES in build.yaml; without the indicator shield the
+// behavior is a no-op, so referencing it unconditionally is safe.
+// (Kconfig symbols like CONFIG_RGBLED_WIDGET are NOT visible in keymap
+// preprocessing, so #if guards around bindings can never work.)
+#include <behaviors/rgbled_widget.dtsi>
 
 // layers
 #define LAYER_Base 0
@@ -189,16 +194,6 @@
                   <&bt BT_SEL 3>;
         };
 
-#if IS_ENABLED(CONFIG_RGBLED_WIDGET)
-        // Magic layer Z: power LED rail, show battery + connection.
-        show_status: show_status {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            wait-ms = <55>;
-            bindings = <&ext_power EP_ON>, <&ind_bat>, <&ind_con>;
-        };
-#endif
-
         // macOS "select whole line": jump to line start, then select to line end.
         select_line: select_line {
             compatible = "zmk,behavior-macro";
@@ -248,6 +243,13 @@
             layers = <LAYER_Base>;
         };
 
+        // Hold Magic (24) + Z (25): show battery and connection LEDs.
+        combo_led_status {
+            timeout-ms = <200>;
+            key-positions = <24 25>;
+            bindings = <&show_status>;
+            layers = <LAYER_Base>;
+        };
     };
 
     keymap {
@@ -306,11 +308,7 @@
             bindings = <
 &bt BT_CLR      &kp C_BRI_DN  &kp C_BRI_UP  &kp C_PREV  &kp C_NEXT  &kp C_PP                     &kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP  &none  &none  &bt BT_CLR_ALL
 &bootloader     &none         &none         &none       &none       &none                        &none       &none         &none         &none  &none  &bootloader
-#if IS_ENABLED(CONFIG_RGBLED_WIDGET)
-&sys_reset      &show_status   &bt_0         &bt_1       &bt_2       &none         &trans  &trans  &none       &none         &none         &none  &none  &sys_reset
-#else
-&sys_reset      &none         &bt_0         &bt_1       &bt_2       &none         &trans  &trans  &none       &none         &none         &none  &none  &sys_reset
-#endif
+&sys_reset      &show_status  &bt_0         &bt_1       &bt_2       &none         &trans  &trans  &none       &none         &none         &none  &none  &sys_reset
 &out OUT_USB    &none         &none         &none       &none       &none                        &none       &none         &none         &none  &none  &none
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;

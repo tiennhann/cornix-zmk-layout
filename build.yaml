@@ -15,24 +15,27 @@
 include:
   # Nice!Nano v2 ZMK variant (quote so // is not mangled)
   # https://zmk.dev/blog/2025/12/09/zephyr-4-1#zmk-board-variant
+  # NOTE: every build that compiles config/cornix.keymap needs the vendored
+  # zmk-rgbled-widget module in ZMK_EXTRA_MODULES, because the keymap includes
+  # <behaviors/rgbled_widget.dtsi> for &show_status. Without the cornix_indicator
+  # shield the behavior is a no-op stub, so default builds stay RGB-free.
   - board: "nice_nano@2.0.0//zmk"
     shield: cornix_dongle_adapter cornix_dongle_eyelash dongle_display
     snippet: studio-rpc-usb-uart nrf52840-nosd
     artifact-name: cornix_dongle_nosd
+    cmake-args: -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE};${GITHUB_WORKSPACE}/modules/zmk-rgbled-widget"
 
-  # Optional RGB indicator firmware (higher power). Default targets above stay RGB-free.
-  # Module is vendored at modules/zmk-rgbled-widget (not in west.yml).
   - board: cornix_left
-    # shield: cornix_indicator
     artifact-name: cornix_left_default_nosd
+    cmake-args: -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE};${GITHUB_WORKSPACE}/modules/zmk-rgbled-widget"
 
   - board: cornix_ph_left
-    # shield: cornix_indicator
     artifact-name: cornix_left_for_dongle_nosd
+    cmake-args: -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE};${GITHUB_WORKSPACE}/modules/zmk-rgbled-widget"
 
   - board: cornix_right
-    # shield: cornix_indicator
     artifact-name: cornix_right_nosd
+    cmake-args: -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE};${GITHUB_WORKSPACE}/modules/zmk-rgbled-widget"
 
   # Optional RGB indicator firmware (higher power use). Default builds above stay RGB-free.
   - board: cornix_left
@@ -54,6 +57,7 @@ include:
     shield: settings_reset
     snippet: studio-rpc-usb-uart nrf52840-nosd
     artifact-name: cornix_reset
+    cmake-args: -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE};${GITHUB_WORKSPACE}/modules/zmk-rgbled-widget"
 
   - board: "nice_nano@2.0.0//zmk"
     shield: settings_reset

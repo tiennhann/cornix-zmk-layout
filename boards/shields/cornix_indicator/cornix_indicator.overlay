@@ -6,7 +6,8 @@
     };
 };
 
-#include <behaviors/rgbled_widget.dtsi>
+// Behavior nodes (&show_status etc.) come from config/cornix.keymap, which
+// includes <behaviors/rgbled_widget.dtsi> unconditionally.
 
 / {
     EXT_POWER {

@@ -204,6 +204,7 @@ static uint8_t last_reported_battery_soc = 0xFF;
 
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
 static int indicate_battery_apply(bool force, int16_t level_hint);
+static void schedule_status_led_timeout(void);
 
 static void widget_ensure_ext_power(void) {
 #if IS_ENABLED(CONFIG_ZMK_EXT_POWER) && __has_include(<drivers/ext_power.h>) &&                  \
@@ -462,10 +463,20 @@ static int indicate_battery_apply(bool force, int16_t level_hint) {
         set_led_pattern(battery_led, &pattern);
     }
 
+    if (ret == 0) {
+        schedule_status_led_timeout();
+    }
+
     return ret;
 #else
     uint8_t color_idx = get_battery_color(battery_level);
-    return set_status_led(STATUS_BATTERY, color_idx, 0, true);
+    int ret = set_status_led(STATUS_BATTERY, color_idx, 0, true);
+
+    if (ret == 0) {
+        schedule_status_led_timeout();
+    }
+
+    return ret;
 #endif
 }
 
@@ -513,7 +524,13 @@ static int indicate_connectivity_apply(bool force) {
     }
 
     last_conn_color = color_idx;
-    return set_status_led(STATUS_CONNECTIVITY, color_idx, 0, true);
+    int ret = set_status_led(STATUS_CONNECTIVITY, color_idx, 0, true);
+
+    if (ret == 0) {
+        schedule_status_led_timeout();
+    }
+
+    return ret;
 }
 
 // Pattern Engine Functions
@@ -691,7 +708,11 @@ static int indicate_connectivity_ws2812(bool force) {
     if (conn_led < CONFIG_RGBLED_WIDGET_LED_COUNT && pattern.type != ANIM_STATIC) {
         set_led_pattern(conn_led, &pattern);
     }
-    
+
+    if (ret == 0) {
+        schedule_status_led_timeout();
+    }
+
     return ret;
 }
 
@@ -1122,6 +1143,27 @@ static void indicate_connectivity_cb(struct k_work *work) {
     indicate_connectivity_internal(force);
 }
 
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
+static struct k_work_delayable status_led_timeout_work;
+
+static void status_led_timeout_cb(struct k_work *work) {
+    ARG_UNUSED(work);
+
+    k_work_cancel_delayable(&indicate_connectivity_work);
+    ws2812_clear_all();
+    last_conn_color = 0xFF;
+    last_reported_battery_soc = 0xFF;
+}
+
+static void schedule_status_led_timeout(void) {
+    if (CONFIG_RGBLED_WIDGET_STATUS_TIMEOUT_MS <= 0) {
+        return;
+    }
+
+    k_work_reschedule(&status_led_timeout_work, K_MSEC(CONFIG_RGBLED_WIDGET_STATUS_TIMEOUT_MS));
+}
+#endif
+
 void indicate_connectivity(void) {
     k_work_reschedule(&indicate_connectivity_work,
                       K_MSEC(CONFIG_RGBLED_WIDGET_CONN_DEBOUNCE_MS));
@@ -1133,22 +1175,6 @@ void indicate_connectivity_force(void) {
 }
 
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
-static struct k_work_delayable show_status_clear_work;
-
-static void show_status_clear_cb(struct k_work *work) {
-    ARG_UNUSED(work);
-
-    k_work_cancel_delayable(&indicate_connectivity_work);
-#if IS_ENABLED(CONFIG_RGBLED_WIDGET_ON_DEMAND_ONLY)
-    ws2812_clear_status_led(STATUS_BATTERY);
-    last_reported_battery_soc = 0xFF;
-#else
-    ws2812_clear_all();
-    last_conn_color = 0xFF;
-    last_reported_battery_soc = 0xFF;
-#endif
-}
-
 void rgbled_widget_show_status(void) {
     k_work_cancel_delayable(&indicate_connectivity_work);
     widget_ensure_ext_power();
@@ -1157,8 +1183,7 @@ void rgbled_widget_show_status(void) {
     last_conn_color = 0xFF;
     indicate_battery_apply(true, -2);
     indicate_connectivity_internal(true);
-    k_work_reschedule(&show_status_clear_work,
-                      K_MSEC(CONFIG_RGBLED_WIDGET_BATTERY_BLINK_MS + CONFIG_RGBLED_WIDGET_INTERVAL_MS));
+    schedule_status_led_timeout();
 }
 #else
 void rgbled_widget_show_status(void) {
@@ -1434,7 +1459,7 @@ extern void led_process_thread(void *d0, void *d1, void *d2) {
 
     k_work_init_delayable(&indicate_connectivity_work, indicate_connectivity_cb);
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
-    k_work_init_delayable(&show_status_clear_work, show_status_clear_cb);
+    k_work_init_delayable(&status_led_timeout_work, status_led_timeout_cb);
 #endif
 
 #if SHOW_LAYER_CHANGE
@@ -1506,11 +1531,7 @@ extern void led_init_thread(void *d0, void *d1, void *d2) {
 
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_ON_DEMAND_ONLY)
     indicate_battery_apply(true, -2);
-    indicate_connectivity_force();
-    k_sleep(K_MSEC(CONFIG_RGBLED_WIDGET_BATTERY_BLINK_MS + CONFIG_RGBLED_WIDGET_INTERVAL_MS));
-    ws2812_clear_all();
-    last_conn_color = 0xFF;
-    last_reported_battery_soc = 0xFF;
+    indicate_connectivity_internal(true);
 #else
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
     indicate_battery_apply(true, -2);

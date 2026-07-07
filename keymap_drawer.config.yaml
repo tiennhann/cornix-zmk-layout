@@ -15,6 +15,9 @@ draw_config:
     }
 
 parse_config:
+  # Resolve #include <behaviors/rgbled_widget.dtsi> in the keymap (vendored module).
+  zmk_additional_includes:
+    - "modules/zmk-rgbled-widget/dts"
   # Mark ALL key sequences that reach a layer as "held" (amber), not just the
   # first. Symbol is reachable from the left thumb, so this keeps highlights
   # consistent with go60.

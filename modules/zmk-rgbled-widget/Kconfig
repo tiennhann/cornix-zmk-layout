@@ -214,6 +214,15 @@ config RGBLED_WIDGET_ON_DEMAND_ONLY
       follows BLE profile and output changes. Waking from idle does not restore
       the battery LED.
 
+config RGBLED_WIDGET_STATUS_TIMEOUT_MS
+    int "Auto turn off status LEDs after this many milliseconds"
+    default 0
+    depends on RGBLED_WIDGET_WS2812
+    help
+      When greater than zero, both status LEDs are turned off after this
+      duration whenever battery or connection indication is shown. Resets on
+      each new indication. Set to 0 to leave LEDs on until keyboard idle.
+
 config RGBLED_WIDGET_OUTPUT_BLINK_MS  # DEPRECATED, do not use
     int
     default 1000
