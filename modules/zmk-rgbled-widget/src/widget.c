@@ -1132,6 +1132,38 @@ void indicate_connectivity_force(void) {
     k_work_reschedule(&indicate_connectivity_work, K_NO_WAIT);
 }
 
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
+static struct k_work_delayable show_status_clear_work;
+
+static void show_status_clear_cb(struct k_work *work) {
+    ARG_UNUSED(work);
+
+    ws2812_clear_all();
+    last_conn_color = 0xFF;
+    last_reported_battery_soc = 0xFF;
+}
+
+void rgbled_widget_show_status(void) {
+    widget_ensure_ext_power();
+    k_sleep(K_MSEC(55));
+    last_reported_battery_soc = 0xFF;
+    last_conn_color = 0xFF;
+    indicate_battery_apply(true, -2);
+    indicate_connectivity_internal(true);
+    k_work_reschedule(&show_status_clear_work,
+                      K_MSEC(CONFIG_RGBLED_WIDGET_BATTERY_BLINK_MS + CONFIG_RGBLED_WIDGET_INTERVAL_MS));
+}
+#else
+void rgbled_widget_show_status(void) {
+#if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
+    indicate_battery();
+#endif
+#if IS_ENABLED(CONFIG_ZMK_USB) || IS_ENABLED(CONFIG_ZMK_BLE)
+    indicate_connectivity_force();
+#endif
+}
+#endif // CONFIG_RGBLED_WIDGET_WS2812
+
 ZMK_LISTENER(led_output_listener, led_output_listener_cb);
 
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
@@ -1150,7 +1182,7 @@ ZMK_SUBSCRIPTION(led_output_listener, zmk_split_peripheral_status_changed);
 #if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
 void indicate_battery(void) {
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
-    indicate_battery_apply(true, -1);
+    indicate_battery_apply(true, -2);
     return;
 #else
     // Original implementation for GPIO LEDs and simple WS2812
@@ -1394,6 +1426,9 @@ extern void led_process_thread(void *d0, void *d1, void *d2) {
     ARG_UNUSED(d2);
 
     k_work_init_delayable(&indicate_connectivity_work, indicate_connectivity_cb);
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
+    k_work_init_delayable(&show_status_clear_work, show_status_clear_cb);
+#endif
 
 #if SHOW_LAYER_CHANGE
     k_work_init_delayable(&layer_indicate_work, indicate_layer_cb);

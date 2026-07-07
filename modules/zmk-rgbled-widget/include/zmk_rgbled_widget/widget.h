@@ -23,6 +23,10 @@ void indicate_connectivity(void);
 void indicate_connectivity_force(void);
 #endif
 
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET)
+void rgbled_widget_show_status(void);
+#endif
+
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 void indicate_layer(void);
 #endif

@@ -18,24 +18,43 @@ struct behavior_rgb_wdg_config {
 
 static int behavior_rgb_wdg_init(const struct device *dev) { return 0; }
 
+static const struct device *behavior_rgb_wdg_get_device(struct zmk_behavior_binding *binding) {
+    const struct device *dev = NULL;
+
+#if IS_ENABLED(CONFIG_ZMK_BEHAVIOR_LOCAL_IDS_IN_BINDINGS)
+    if (binding->local_id > 0) {
+        const char *name = zmk_behavior_find_behavior_name_from_local_id(binding->local_id);
+
+        if (name != NULL) {
+            dev = zmk_behavior_get_binding(name);
+        }
+    }
+#endif
+
+    if (dev == NULL && binding->behavior_dev != NULL) {
+        dev = zmk_behavior_get_binding(binding->behavior_dev);
+    }
+
+    return dev;
+}
+
 static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
                                      struct zmk_behavior_binding_event event) {
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET)
-    const struct device *dev = zmk_behavior_get_binding(binding->behavior_dev);
+    const struct device *dev = behavior_rgb_wdg_get_device(binding);
 
     if (dev == NULL) {
-        LOG_WRN("rgbled-widget behavior not found in devicetree");
+        LOG_WRN("rgbled-widget behavior not found");
         return ZMK_BEHAVIOR_OPAQUE;
     }
 
     const struct behavior_rgb_wdg_config *cfg = dev->config;
 
-    LOG_DBG("rgbled-widget pressed: bat %d con %d lyr %d", cfg->indicate_battery,
-            cfg->indicate_connectivity, cfg->indicate_layer);
-
-#if IS_ENABLED(CONFIG_ZMK_EXT_POWER)
-    k_sleep(K_MSEC(55));
-#endif
+    if (cfg->indicate_battery && cfg->indicate_connectivity) {
+        LOG_DBG("rgbled-widget show_status from key %d", event.position);
+        rgbled_widget_show_status();
+        return ZMK_BEHAVIOR_OPAQUE;
+    }
 
 #if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
     if (cfg->indicate_battery) {
@@ -65,7 +84,7 @@ static int on_keymap_binding_released(struct zmk_behavior_binding *binding,
 static const struct behavior_driver_api behavior_rgb_wdg_driver_api = {
     .binding_pressed = on_keymap_binding_pressed,
     .binding_released = on_keymap_binding_released,
-    .locality = BEHAVIOR_LOCALITY_EVENT_SOURCE,
+    .locality = BEHAVIOR_LOCALITY_GLOBAL,
 #if IS_ENABLED(CONFIG_ZMK_BEHAVIOR_METADATA)
     .get_parameter_metadata = zmk_behavior_get_empty_param_metadata,
 #endif // IS_ENABLED(CONFIG_ZMK_BEHAVIOR_METADATA)
@@ -74,7 +93,7 @@ static const struct behavior_driver_api behavior_rgb_wdg_driver_api = {
 #define RGBIND_INST(n)                                                                             \
     static struct behavior_rgb_wdg_config behavior_rgb_wdg_config_##n = {                          \
         .indicate_battery = DT_INST_PROP(n, indicate_battery),                                     \
-        .indicate_connectivity = DT_INST_PROP(n, indicate_connectivity),                           \
+        .indicate_connectivity = DT_INST_PROP(n, indicate_connectivity),                         \
         .indicate_layer = DT_INST_PROP(n, indicate_layer),                                         \
     };                                                                                             \
     BEHAVIOR_DT_INST_DEFINE(n, behavior_rgb_wdg_init, NULL, NULL, &behavior_rgb_wdg_config_##n,    \

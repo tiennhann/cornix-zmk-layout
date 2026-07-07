@@ -237,6 +237,15 @@
             bindings = <&kp RET>;
             layers = <LAYER_Base>;
         };
+
+#if DT_NODE_EXISTS(DT_NODELABEL(show_status))
+        // Hold Magic (key left of Z) + Z to show battery and connection LEDs.
+        combo_show_status {
+            timeout-ms = <150>;
+            key-positions = <24 25>;
+            bindings = <&show_status>;
+        };
+#endif
     };
 
     keymap {
@@ -295,7 +304,7 @@
             bindings = <
 &bt BT_CLR      &kp C_BRI_DN  &kp C_BRI_UP  &kp C_PREV  &kp C_NEXT  &kp C_PP                     &kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP  &none  &none  &bt BT_CLR_ALL
 &bootloader     &none         &none         &none       &none       &none                        &none       &none         &none         &none  &none  &bootloader
-#if IS_ENABLED(CONFIG_RGBLED_WIDGET)
+#if DT_NODE_EXISTS(DT_NODELABEL(show_status))
 &sys_reset      &show_status   &bt_0         &bt_1       &bt_2       &none         &trans  &trans  &none       &none         &none         &none  &none  &sys_reset
 #else
 &sys_reset      &none         &bt_0         &bt_1       &bt_2       &none         &trans  &trans  &none       &none         &none         &none  &none  &sys_reset
