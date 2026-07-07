@@ -666,8 +666,12 @@ static int indicate_connectivity_enhanced(void) {
 
 static int indicate_layer_enhanced(bool use_shared) {
     uint8_t layer_index = zmk_keymap_highest_layer_active();
-    uint8_t color_idx = SHOW_LAYER_COLORS ? layer_color_idx[layer_index] : 
-                        CONFIG_RGBLED_WIDGET_LAYER_COLOR;
+    uint8_t color_idx;
+#if SHOW_LAYER_COLORS
+    color_idx = layer_color_idx[layer_index];
+#else
+    color_idx = CONFIG_RGBLED_WIDGET_LAYER_COLOR;
+#endif
     uint32_t timeout_ms = use_shared ? CONFIG_RGBLED_WIDGET_SHARE_TIMEOUT_MS : 0;
     return set_status_led(STATUS_LAYER, color_idx, timeout_ms, !use_shared);
 }
