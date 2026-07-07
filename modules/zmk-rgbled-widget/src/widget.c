@@ -1109,6 +1109,9 @@ static int led_output_listener_cb(const zmk_event_t *eh) {
     if (!initialized) {
         return 0;
     }
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_ON_DEMAND_ONLY)
+    return 0;
+#endif
     indicate_connectivity();
     return 0;
 }
@@ -1138,12 +1141,14 @@ static struct k_work_delayable show_status_clear_work;
 static void show_status_clear_cb(struct k_work *work) {
     ARG_UNUSED(work);
 
+    k_work_cancel_delayable(&indicate_connectivity_work);
     ws2812_clear_all();
     last_conn_color = 0xFF;
     last_reported_battery_soc = 0xFF;
 }
 
 void rgbled_widget_show_status(void) {
+    k_work_cancel_delayable(&indicate_connectivity_work);
     widget_ensure_ext_power();
     k_sleep(K_MSEC(55));
     last_reported_battery_soc = 0xFF;
