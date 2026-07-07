@@ -120,10 +120,6 @@ BUILD_ASSERT(!(SHOW_LAYER_CHANGE && SHOW_LAYER_COLORS),
 static const char *color_names[] = {"black", "red",     "green", "yellow",
                                     "blue",  "magenta", "cyan",  "white"};
 
-#if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
-static uint8_t get_battery_color(uint8_t battery_level);
-#endif
-
 #if SHOW_LAYER_COLORS
 static const uint8_t layer_color_idx[] = {
     CONFIG_RGBLED_WIDGET_LAYER_0_COLOR,  CONFIG_RGBLED_WIDGET_LAYER_1_COLOR,
@@ -155,6 +151,26 @@ static const uint8_t layer_color_idx[] = {
 #define LOG_BATTERY(battery_level, color_label)                                                    \
     LOG_INF("Battery level %d, blinking %s", battery_level,                                        \
             color_names[CONFIG_RGBLED_WIDGET_BATTERY_COLOR_##color_label])
+
+#if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
+static uint8_t get_battery_color(uint8_t battery_level) {
+    if (battery_level == 0) {
+        LOG_INF("Battery level undetermined (zero), blinking %s",
+                color_names[CONFIG_RGBLED_WIDGET_BATTERY_COLOR_MISSING]);
+        return CONFIG_RGBLED_WIDGET_BATTERY_COLOR_MISSING;
+    }
+    if (battery_level >= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_HIGH) {
+        LOG_BATTERY(battery_level, HIGH);
+        return CONFIG_RGBLED_WIDGET_BATTERY_COLOR_HIGH;
+    }
+    if (battery_level >= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_LOW) {
+        LOG_BATTERY(battery_level, MEDIUM);
+        return CONFIG_RGBLED_WIDGET_BATTERY_COLOR_MEDIUM;
+    }
+    LOG_BATTERY(battery_level, LOW);
+    return CONFIG_RGBLED_WIDGET_BATTERY_COLOR_LOW;
+}
+#endif
 
 // a blink work item as specified by the color and duration
 struct blink_item {
@@ -892,7 +908,11 @@ int ws2812_indicate_battery_enhanced(void) {
 }
 
 int ws2812_indicate_connectivity_enhanced(void) {
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_ANIMATIONS)
     return indicate_connectivity_ws2812();
+#else
+    return indicate_connectivity_enhanced();
+#endif
 }
 
 int ws2812_indicate_layer_enhanced(bool use_shared) {
@@ -1025,24 +1045,6 @@ ZMK_SUBSCRIPTION(led_output_listener, zmk_split_peripheral_status_changed);
 #endif
 
 #if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
-static inline uint8_t get_battery_color(uint8_t battery_level) {
-    if (battery_level == 0) {
-        LOG_INF("Battery level undetermined (zero), blinking %s",
-                color_names[CONFIG_RGBLED_WIDGET_BATTERY_COLOR_MISSING]);
-        return CONFIG_RGBLED_WIDGET_BATTERY_COLOR_MISSING;
-    }
-    if (battery_level >= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_HIGH) {
-        LOG_BATTERY(battery_level, HIGH);
-        return CONFIG_RGBLED_WIDGET_BATTERY_COLOR_HIGH;
-    }
-    if (battery_level >= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_LOW) {
-        LOG_BATTERY(battery_level, MEDIUM);
-        return CONFIG_RGBLED_WIDGET_BATTERY_COLOR_MEDIUM;
-    }
-    LOG_BATTERY(battery_level, LOW);
-    return CONFIG_RGBLED_WIDGET_BATTERY_COLOR_LOW;
-}
-
 void indicate_battery(void) {
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
     // Use enhanced battery indication for WS2812
