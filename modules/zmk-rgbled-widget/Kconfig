@@ -17,11 +17,12 @@ config RGBLED_WIDGET_WS2812
     bool "Use WS2812 addressable LEDs instead of GPIO LEDs"
     default n
     select LED_STRIP
-    select WS2812_STRIP
     help
       Enable WS2812 (NeoPixel) addressable LED support with multi-LED
       capabilities, spatial mapping, animations, and LED sharing.
       When disabled, the original GPIO LED implementation is used.
+      On Zephyr 4.1+, WS2812_STRIP_SPI is enabled automatically from
+      devicetree (worldsemi,ws2812-spi); do not set CONFIG_WS2812_STRIP.
 
 if RGBLED_WIDGET_WS2812
 
