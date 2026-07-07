@@ -183,6 +183,12 @@ static uint8_t read_battery_level_with_retry(void) {
 
     return battery_level;
 }
+
+static uint8_t last_reported_battery_soc = 0xFF;
+
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
+static int indicate_battery_apply(bool force, int16_t level_hint);
+#endif
 #endif
 
 // a blink work item as specified by the color and duration
@@ -348,6 +354,135 @@ int ws2812_clear_status_led(enum status_type status_type) {
     return 0;
 }
 
+static bool battery_color_band_changed(uint8_t old_level, uint8_t new_level) {
+    if (old_level == 0xFF) {
+        return true;
+    }
+    return get_battery_color(old_level) != get_battery_color(new_level);
+}
+
+static int indicate_battery_apply(bool force, int16_t level_hint) {
+    uint8_t battery_level;
+
+    if (force) {
+        battery_level = read_battery_level_with_retry();
+    } else if (level_hint >= 0) {
+        battery_level = (uint8_t)level_hint;
+    } else {
+        battery_level = zmk_battery_state_of_charge();
+    }
+
+    if (battery_level == 0) {
+        if (force) {
+            LOG_INF("Battery level still undetermined after retry, skipping indication");
+        }
+        return 0;
+    }
+
+    if (!force) {
+        bool critical = battery_level <= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL;
+        bool was_critical = last_reported_battery_soc != 0xFF &&
+                            last_reported_battery_soc <= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL;
+
+        if (!critical && !was_critical && battery_level == last_reported_battery_soc) {
+            return 0;
+        }
+        if (!critical && !was_critical && last_reported_battery_soc != 0xFF &&
+            !battery_color_band_changed(last_reported_battery_soc, battery_level)) {
+            last_reported_battery_soc = battery_level;
+            return 0;
+        }
+    }
+
+    last_reported_battery_soc = battery_level;
+
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_ANIMATIONS)
+    uint8_t color_idx = 0;
+    struct animation_state pattern = {0};
+
+    if (battery_level <= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL) {
+        color_idx = CONFIG_RGBLED_WIDGET_BATTERY_COLOR_CRITICAL;
+        pattern.type = ANIM_PULSE;
+        pattern.period_ms = 2000;
+        pattern.start_color = color_idx;
+    } else if (battery_level >= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_HIGH) {
+        color_idx = CONFIG_RGBLED_WIDGET_BATTERY_COLOR_HIGH;
+        pattern.type = ANIM_STATIC;
+        pattern.start_color = color_idx;
+    } else if (battery_level >= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_LOW) {
+        color_idx = CONFIG_RGBLED_WIDGET_BATTERY_COLOR_MEDIUM;
+        pattern.type = ANIM_STATIC;
+        pattern.start_color = color_idx;
+    } else {
+        color_idx = CONFIG_RGBLED_WIDGET_BATTERY_COLOR_LOW;
+        pattern.type = ANIM_STATIC;
+        pattern.start_color = color_idx;
+    }
+
+    LOG_INF("Enhanced battery indication: level %d%%, color %s, pattern %d", battery_level,
+            color_names[color_idx], pattern.type);
+
+    int ret = set_status_led(STATUS_BATTERY, color_idx, 0, true);
+    uint8_t battery_led = get_primary_led_for_status(STATUS_BATTERY);
+
+    if (battery_led < CONFIG_RGBLED_WIDGET_LED_COUNT && pattern.type != ANIM_STATIC) {
+        set_led_pattern(battery_led, &pattern);
+    }
+
+    return ret;
+#else
+    uint8_t color_idx = get_battery_color(battery_level);
+    return set_status_led(STATUS_BATTERY, color_idx, 0, true);
+#endif
+}
+
+static uint8_t get_connectivity_color_idx(void) {
+    uint8_t color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_DISCONNECTED;
+
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    switch (zmk_endpoint_get_selected().transport) {
+    case ZMK_TRANSPORT_USB:
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_CONN_SHOW_USB)
+        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_USB;
+#endif
+        break;
+    case ZMK_TRANSPORT_BLE:
+#if IS_ENABLED(CONFIG_ZMK_BLE)
+        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
+#endif
+        break;
+    default:
+#if IS_ENABLED(CONFIG_ZMK_BLE)
+        if (zmk_endpoint_get_preferred_transport() != ZMK_TRANSPORT_NONE &&
+            zmk_ble_active_profile_is_open()) {
+            color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_ADVERTISING;
+        }
+#endif
+        break;
+    }
+#elif IS_ENABLED(CONFIG_ZMK_SPLIT_BLE)
+    if (zmk_split_bt_peripheral_is_connected()) {
+        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
+    }
+#endif
+
+    return color_idx;
+}
+
+static uint8_t last_conn_color = 0xFF;
+static bool connectivity_update_force = false;
+
+static int indicate_connectivity_apply(bool force) {
+    uint8_t color_idx = get_connectivity_color_idx();
+
+    if (!force && color_idx == last_conn_color) {
+        return 0;
+    }
+
+    last_conn_color = color_idx;
+    return set_status_led(STATUS_CONNECTIVITY, color_idx, 0, true);
+}
+
 // Pattern Engine Functions
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_ANIMATIONS)
 
@@ -486,102 +621,36 @@ static void update_all_animations(void) {
 }
 
 // Enhanced status indication with patterns
-static int indicate_battery_enhanced(void) {
-    uint8_t battery_level = read_battery_level_with_retry();
-    uint8_t color_idx = 0;
-    struct animation_state pattern = {0};
+static int indicate_battery_enhanced(void) { return indicate_battery_apply(true, -1); }
 
-    if (battery_level == 0) {
-        LOG_INF("Battery level still undetermined after retry, skipping indication");
+static int indicate_connectivity_ws2812(bool force) {
+    uint8_t color_idx = get_connectivity_color_idx();
+    struct animation_state pattern = {0};
+    pattern.type = ANIM_STATIC;
+
+    if (!force && color_idx == last_conn_color) {
         return 0;
     }
 
-    if (battery_level <= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL) {
-        color_idx = CONFIG_RGBLED_WIDGET_BATTERY_COLOR_CRITICAL;
+    last_conn_color = color_idx;
+
+    if (color_idx == CONFIG_RGBLED_WIDGET_CONN_COLOR_ADVERTISING) {
         pattern.type = ANIM_PULSE;
         pattern.period_ms = 2000;
         pattern.start_color = color_idx;
-    } else if (battery_level >= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_HIGH) {
-        color_idx = CONFIG_RGBLED_WIDGET_BATTERY_COLOR_HIGH;
-        pattern.type = ANIM_STATIC;
-        pattern.start_color = color_idx;
-    } else if (battery_level >= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_LOW) {
-        color_idx = CONFIG_RGBLED_WIDGET_BATTERY_COLOR_MEDIUM;
-        pattern.type = ANIM_STATIC;
-        pattern.start_color = color_idx;
-    } else {
-        color_idx = CONFIG_RGBLED_WIDGET_BATTERY_COLOR_LOW;
-        pattern.type = ANIM_STATIC;
-        pattern.start_color = color_idx;
-    }
-    
-    LOG_INF("Enhanced battery indication: level %d%%, color %s, pattern %d", 
-            battery_level, color_names[color_idx], pattern.type);
-    
-    int ret = set_status_led(STATUS_BATTERY, color_idx, 0, true);
-    
-    // Apply pattern if using spatial mapping
-    uint8_t battery_led = get_primary_led_for_status(STATUS_BATTERY);
-    if (battery_led < CONFIG_RGBLED_WIDGET_LED_COUNT && pattern.type != ANIM_STATIC) {
-        set_led_pattern(battery_led, &pattern);
-    }
-    
-    return ret;
-}
-
-static int indicate_connectivity_ws2812(void) {
-    uint8_t color_idx = 0;
-    struct animation_state pattern = {0};
-    pattern.type = ANIM_STATIC;
-    
-#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    switch (zmk_endpoint_get_selected().transport) {
-    case ZMK_TRANSPORT_USB:
-#if IS_ENABLED(CONFIG_RGBLED_WIDGET_CONN_SHOW_USB)
-        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_USB;
-        LOG_INF("Enhanced USB connection indication");
-        break;
-#endif
-    case ZMK_TRANSPORT_BLE:
-#if IS_ENABLED(CONFIG_ZMK_BLE)
-        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
-        LOG_INF("BLE connected indication");
-#endif
-        break;
-    default:
-#if IS_ENABLED(CONFIG_ZMK_BLE)
-        if (zmk_endpoint_get_preferred_transport() != ZMK_TRANSPORT_NONE &&
-            zmk_ble_active_profile_is_open()) {
-            color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_ADVERTISING;
-            pattern.type = ANIM_PULSE;
-            pattern.period_ms = 2000;
-            pattern.start_color = color_idx;
-            LOG_INF("BLE advertising indication");
-        } else {
-            color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_DISCONNECTED;
-            pattern.type = ANIM_BLINK;
-            pattern.period_ms = 1000;
-            pattern.start_color = color_idx;
-            pattern.end_color = 0;
-            LOG_INF("BLE disconnected indication");
-        }
-#endif
-        break;
-    }
-#elif IS_ENABLED(CONFIG_ZMK_SPLIT_BLE)
-    if (zmk_split_bt_peripheral_is_connected()) {
-        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
-        LOG_INF("Enhanced peripheral connected indication");
-    } else {
-        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_DISCONNECTED;
+        LOG_INF("BLE advertising indication");
+    } else if (color_idx == CONFIG_RGBLED_WIDGET_CONN_COLOR_DISCONNECTED) {
         pattern.type = ANIM_BLINK;
         pattern.period_ms = 1000;
         pattern.start_color = color_idx;
         pattern.end_color = 0;
-        LOG_INF("Enhanced peripheral disconnected indication");
+        LOG_INF("BLE disconnected indication");
+    } else if (color_idx == CONFIG_RGBLED_WIDGET_CONN_COLOR_USB) {
+        LOG_INF("Enhanced USB connection indication");
+    } else if (color_idx == CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED) {
+        LOG_INF("BLE connected indication");
     }
-#endif
-    
+
     int ret = set_status_led(STATUS_CONNECTIVITY, color_idx, 0, true);
     
     // Apply pattern if using spatial mapping
@@ -637,50 +706,9 @@ static int indicate_layer_enhanced(bool use_shared) {
 #else // !CONFIG_RGBLED_WIDGET_ANIMATIONS
 
 // Simplified versions without animations
-static int indicate_battery_enhanced(void) {
-    uint8_t battery_level = read_battery_level_with_retry();
+static int indicate_battery_enhanced(void) { return indicate_battery_apply(true, -1); }
 
-    if (battery_level == 0) {
-        LOG_INF("Battery level still undetermined after retry, skipping indication");
-        return 0;
-    }
-
-    uint8_t color_idx = get_battery_color(battery_level);
-    return set_status_led(STATUS_BATTERY, color_idx, 0, true);
-}
-
-static int indicate_connectivity_enhanced(void) {
-    uint8_t color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_DISCONNECTED;
-
-#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    switch (zmk_endpoint_get_selected().transport) {
-    case ZMK_TRANSPORT_USB:
-#if IS_ENABLED(CONFIG_RGBLED_WIDGET_CONN_SHOW_USB)
-        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_USB;
-#endif
-        break;
-    case ZMK_TRANSPORT_BLE:
-#if IS_ENABLED(CONFIG_ZMK_BLE)
-        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
-#endif
-        break;
-    default:
-#if IS_ENABLED(CONFIG_ZMK_BLE)
-        if (zmk_endpoint_get_preferred_transport() != ZMK_TRANSPORT_NONE &&
-            zmk_ble_active_profile_is_open()) {
-            color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_ADVERTISING;
-        }
-#endif
-        break;
-    }
-#elif IS_ENABLED(CONFIG_ZMK_SPLIT_BLE)
-    if (zmk_split_bt_peripheral_is_connected()) {
-        color_idx = CONFIG_RGBLED_WIDGET_CONN_COLOR_CONNECTED;
-    }
-#endif
-
-    return set_status_led(STATUS_CONNECTIVITY, color_idx, 0, true);
-}
+static int indicate_connectivity_enhanced(void) { return indicate_connectivity_apply(false); }
 
 static int indicate_layer_enhanced(bool use_shared) {
     uint8_t layer_index = zmk_keymap_highest_layer_active();
@@ -931,7 +959,7 @@ int ws2812_indicate_battery_enhanced(void) {
 
 int ws2812_indicate_connectivity_enhanced(void) {
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_ANIMATIONS)
-    return indicate_connectivity_ws2812();
+    return indicate_connectivity_ws2812(false);
 #else
     return indicate_connectivity_enhanced();
 #endif
@@ -986,12 +1014,12 @@ static void set_rgb_leds(uint8_t color, uint16_t duration_ms) {
 // separate thread
 K_MSGQ_DEFINE(led_msgq, sizeof(struct blink_item), 16, 1);
 
-static void indicate_connectivity_internal(void) {
+static void indicate_connectivity_internal(bool force) {
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_ANIMATIONS)
-    indicate_connectivity_ws2812();
+    indicate_connectivity_ws2812(force);
 #else
-    indicate_connectivity_enhanced();
+    indicate_connectivity_apply(force);
 #endif
     return;
 #else
@@ -1048,8 +1076,22 @@ static int led_output_listener_cb(const zmk_event_t *eh) {
 
 // debouncing to ignore all but last connectivity event, to prevent repeat blinks
 static struct k_work_delayable indicate_connectivity_work;
-static void indicate_connectivity_cb(struct k_work *work) { indicate_connectivity_internal(); }
-void indicate_connectivity() { k_work_reschedule(&indicate_connectivity_work, K_MSEC(16)); }
+static void indicate_connectivity_cb(struct k_work *work) {
+    ARG_UNUSED(work);
+    bool force = connectivity_update_force;
+    connectivity_update_force = false;
+    indicate_connectivity_internal(force);
+}
+
+void indicate_connectivity(void) {
+    k_work_reschedule(&indicate_connectivity_work,
+                      K_MSEC(CONFIG_RGBLED_WIDGET_CONN_DEBOUNCE_MS));
+}
+
+void indicate_connectivity_force(void) {
+    connectivity_update_force = true;
+    k_work_reschedule(&indicate_connectivity_work, K_NO_WAIT);
+}
 
 ZMK_LISTENER(led_output_listener, led_output_listener_cb);
 
@@ -1069,8 +1111,7 @@ ZMK_SUBSCRIPTION(led_output_listener, zmk_split_peripheral_status_changed);
 #if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
 void indicate_battery(void) {
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
-    // Use enhanced battery indication for WS2812
-    indicate_battery_enhanced();
+    indicate_battery_apply(true, -1);
     return;
 #else
     // Original implementation for GPIO LEDs and simple WS2812
@@ -1131,7 +1172,8 @@ static int led_battery_listener_cb(const zmk_event_t *eh) {
 
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
     if (battery_level > 0) {
-        indicate_battery();
+        bool force = battery_level <= CONFIG_RGBLED_WIDGET_BATTERY_LEVEL_CRITICAL;
+        indicate_battery_apply(force, battery_level);
     }
 #else
     // check if we are in critical battery levels at state change, blink if we are
@@ -1152,6 +1194,44 @@ static int led_battery_listener_cb(const zmk_event_t *eh) {
 ZMK_LISTENER(led_battery_listener, led_battery_listener_cb);
 ZMK_SUBSCRIPTION(led_battery_listener, zmk_battery_state_changed);
 #endif // IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
+
+#if IS_ENABLED(CONFIG_RGBLED_WIDGET_IDLE_LED_OFF) && IS_ENABLED(CONFIG_RGBLED_WIDGET_WS2812)
+static int led_idle_listener_cb(const zmk_event_t *eh) {
+    struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
+
+    if (!initialized || ev == NULL) {
+        return 0;
+    }
+
+    switch (ev->state) {
+    case ZMK_ACTIVITY_IDLE:
+    case ZMK_ACTIVITY_SLEEP:
+        LOG_INF("Idle: turn off indicator LEDs");
+        ws2812_clear_all();
+        last_conn_color = 0xFF;
+#if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
+        last_reported_battery_soc = 0xFF;
+#endif
+        break;
+    case ZMK_ACTIVITY_ACTIVE:
+        LOG_INF("Active: restore indicator LEDs");
+#if IS_ENABLED(CONFIG_ZMK_BATTERY_REPORTING)
+        indicate_battery();
+#endif
+#if IS_ENABLED(CONFIG_ZMK_BLE)
+        indicate_connectivity_force();
+#endif
+        break;
+    default:
+        break;
+    }
+
+    return 0;
+}
+
+ZMK_LISTENER(led_idle_listener, led_idle_listener_cb);
+ZMK_SUBSCRIPTION(led_idle_listener, zmk_activity_state_changed);
+#endif // RGBLED_WIDGET_IDLE_LED_OFF && RGBLED_WIDGET_WS2812
 
 uint8_t led_layer_color = 0;
 #if SHOW_LAYER_COLORS
@@ -1349,7 +1429,7 @@ extern void led_init_thread(void *d0, void *d1, void *d2) {
 
     // check and indicate current profile or peripheral connectivity status
     LOG_INF("Indicating initial connectivity status");
-    indicate_connectivity();
+    indicate_connectivity_force();
 
 #if SHOW_LAYER_COLORS
     LOG_INF("Setting initial layer color");

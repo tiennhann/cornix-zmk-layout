@@ -189,6 +189,20 @@ config RGBLED_WIDGET_CONN_BLINK_MS
 config RGBLED_WIDGET_CONN_SHOW_USB
     bool "Show USB indicator instead of BLE status if it has priority"
 
+config RGBLED_WIDGET_CONN_DEBOUNCE_MS
+    int "Delay before updating connectivity LED after link changes (ms)"
+    default 16
+    help
+      Ignores brief BLE disconnects shorter than this window. Use ~750 on
+      split keyboards in metal cases to reduce connection LED flicker.
+
+config RGBLED_WIDGET_IDLE_LED_OFF
+    bool "Turn off indicator LEDs when the keyboard becomes idle"
+    default n
+    help
+      When enabled, clears status LEDs on idle/sleep and restores them on
+      the next key press (pairs with ZMK ext-power idle behavior).
+
 config RGBLED_WIDGET_OUTPUT_BLINK_MS  # DEPRECATED, do not use
     int
     default 1000

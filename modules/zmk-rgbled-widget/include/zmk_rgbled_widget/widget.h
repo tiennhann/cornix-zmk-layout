@@ -20,6 +20,7 @@ void indicate_battery(void);
 
 #if IS_ENABLED(CONFIG_ZMK_BLE)
 void indicate_connectivity(void);
+void indicate_connectivity_force(void);
 #endif
 
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
