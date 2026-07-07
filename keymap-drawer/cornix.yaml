@@ -179,7 +179,7 @@ layers:
   - ''
   - Bootloader
   - {t: Reset, type: held}
-  - ''
+  - LED Status
   - BT 0
   - BT 1
   - BT 2
@@ -258,4 +258,7 @@ layers:
 combos:
 - p: [20, 21]
   k: RET
+  l: [Base]
+- p: [24, 25]
+  k: LED Status
   l: [Base]
