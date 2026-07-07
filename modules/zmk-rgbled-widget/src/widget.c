@@ -14,8 +14,8 @@
 #include <zmk/battery.h>
 #include <zmk/ble.h>
 #include <zmk/endpoints.h>
-#if IS_ENABLED(CONFIG_ZMK_EXT_POWER)
-#include <zmk/ext_power.h>
+#if IS_ENABLED(CONFIG_ZMK_EXT_POWER) && __has_include(<drivers/ext_power.h>)
+#include <drivers/ext_power.h>
 #endif
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
@@ -206,11 +206,12 @@ static uint8_t last_reported_battery_soc = 0xFF;
 static int indicate_battery_apply(bool force, int16_t level_hint);
 
 static void widget_ensure_ext_power(void) {
-#if IS_ENABLED(CONFIG_ZMK_EXT_POWER)
-    const struct device *ext_power = zmk_ext_power_get();
+#if IS_ENABLED(CONFIG_ZMK_EXT_POWER) && __has_include(<drivers/ext_power.h>) &&                  \
+    DT_NODE_EXISTS(DT_NODELABEL(EXT_POWER)) && DT_NODE_HAS_STATUS(DT_NODELABEL(EXT_POWER), okay)
+    const struct device *ext_power = DEVICE_DT_GET(DT_NODELABEL(EXT_POWER));
 
-    if (ext_power != NULL) {
-        zmk_ext_power_enable(ext_power);
+    if (device_is_ready(ext_power)) {
+        ext_power_enable(ext_power);
     }
 #endif
 }
