@@ -243,13 +243,6 @@
             layers = <LAYER_Base>;
         };
 
-        // Hold Magic (24) + Z (25): show battery and connection LEDs.
-        combo_led_status {
-            timeout-ms = <200>;
-            key-positions = <24 25>;
-            bindings = <&show_status>;
-            layers = <LAYER_Base>;
-        };
     };
 
     keymap {
