@@ -109,9 +109,9 @@ layers:
   - ''
   - Browser Back
   - Browser Fwd
-  - PG UP
+  - ''
   - HOME
-  - UP
+  - ''
   - END
   - Search Selected
   - ''
@@ -121,10 +121,10 @@ layers:
   - Mouse Down
   - Mouse Right
   - Scroll Up
-  - PG DN
-  - LEFT
-  - DOWN
-  - RIGHT
+  - ''
+  - ''
+  - ''
+  - ''
   - Copy Area Screenshot
   - ''
   - ''
