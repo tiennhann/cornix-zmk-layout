@@ -22,10 +22,11 @@ struct behavior_rgb_wdg_config {
 static int behavior_rgb_wdg_init(const struct device *dev) { return 0; }
 
 #if IS_ENABLED(CONFIG_RGBLED_WIDGET)
+// Node is named "ind_stat" (must be <= 8 chars for split peripheral relay).
 static bool binding_is_show_status(struct zmk_behavior_binding *binding) {
     if (binding->behavior_dev != NULL) {
-        if (strcmp(binding->behavior_dev, "show_status") == 0 ||
-            strcmp(binding->behavior_dev, "SHOW_STATUS") == 0) {
+        if (strcmp(binding->behavior_dev, "ind_stat") == 0 ||
+            strcmp(binding->behavior_dev, "show_status") == 0) {
             return true;
         }
     }
@@ -35,7 +36,7 @@ static bool binding_is_show_status(struct zmk_behavior_binding *binding) {
         const char *name = zmk_behavior_find_behavior_name_from_local_id(binding->local_id);
 
         if (name != NULL &&
-            (strcmp(name, "show_status") == 0 || strcmp(name, "SHOW_STATUS") == 0)) {
+            (strcmp(name, "ind_stat") == 0 || strcmp(name, "show_status") == 0)) {
             return true;
         }
     }

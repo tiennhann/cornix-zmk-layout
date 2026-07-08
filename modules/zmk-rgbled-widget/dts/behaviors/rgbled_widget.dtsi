@@ -10,7 +10,9 @@
             #binding-cells = <0>;
             indicate-connectivity;
         };
-        /omit-if-no-ref/ show_status: show_status {
+        // Node name must be <= 8 chars: ZMK truncates behavior names to 8
+        // chars when relaying global behaviors to split peripherals.
+        /omit-if-no-ref/ show_status: ind_stat {
             compatible = "zmk,behavior-rgbled-widget";
             #binding-cells = <0>;
             indicate-battery;
