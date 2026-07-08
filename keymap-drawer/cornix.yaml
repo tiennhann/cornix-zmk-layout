@@ -259,6 +259,3 @@ combos:
 - p: [20, 21]
   k: RET
   l: [Base]
-- p: [24, 25]
-  k: LED Status
-  l: [Base]
