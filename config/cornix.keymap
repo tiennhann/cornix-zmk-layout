@@ -138,29 +138,33 @@
             bindings = <&mo LAYER_Keypad>, <&to LAYER_Keypad>;
         };
 
+        // Single tap: switch to that BT profile (host).
+        // Double tap: select that profile and clear its bond so the keyboard
+        // advertises for a new pairing (needed for iPad / second PC, etc.).
+        // BT_DISC alone does not put the keyboard into pairing mode.
         bt_0: bt_0 {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
             tapping-term-ms = <200>;
-            bindings = <&bt_select_0>, <&bt BT_DISC 0>;
+            bindings = <&bt_select_0>, <&bt_pair_0>;
         };
         bt_1: bt_1 {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
             tapping-term-ms = <200>;
-            bindings = <&bt_select_1>, <&bt BT_DISC 1>;
+            bindings = <&bt_select_1>, <&bt_pair_1>;
         };
         bt_2: bt_2 {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
             tapping-term-ms = <200>;
-            bindings = <&bt_select_2>, <&bt BT_DISC 2>;
+            bindings = <&bt_select_2>, <&bt_pair_2>;
         };
         bt_3: bt_3 {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
             tapping-term-ms = <200>;
-            bindings = <&bt_select_3>, <&bt BT_DISC 3>;
+            bindings = <&bt_select_3>, <&bt_pair_3>;
         };
     };
 
@@ -192,6 +196,44 @@
             bindings
                 = <&out OUT_BLE>,
                   <&bt BT_SEL 3>;
+        };
+
+        // Clear a specific profile so it advertises for a new host (pairing mode).
+        bt_pair_0: bt_pair_0 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <50>;
+            bindings
+                = <&out OUT_BLE>,
+                  <&bt BT_SEL 0>,
+                  <&bt BT_CLR>;
+        };
+        bt_pair_1: bt_pair_1 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <50>;
+            bindings
+                = <&out OUT_BLE>,
+                  <&bt BT_SEL 1>,
+                  <&bt BT_CLR>;
+        };
+        bt_pair_2: bt_pair_2 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <50>;
+            bindings
+                = <&out OUT_BLE>,
+                  <&bt BT_SEL 2>,
+                  <&bt BT_CLR>;
+        };
+        bt_pair_3: bt_pair_3 {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <50>;
+            bindings
+                = <&out OUT_BLE>,
+                  <&bt BT_SEL 3>,
+                  <&bt BT_CLR>;
         };
 
         // macOS "select whole line": jump to line start, then select to line end.
