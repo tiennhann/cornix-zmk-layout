@@ -106,9 +106,9 @@ layers:
   - ''
   - Prev Tab
   - Next Tab
-  - ''
   - Browser Back
   - Browser Fwd
+  - ''
   - ''
   - HOME
   - UP
@@ -164,8 +164,8 @@ layers:
   - VOL DN
   - VOL UP
   - ''
-  - BT Clear All
   - BT Clear
+  - BT Clear All
   - Bootloader
   - ''
   - ''
