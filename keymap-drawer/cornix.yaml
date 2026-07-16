@@ -111,28 +111,28 @@ layers:
   - Browser Fwd
   - ''
   - HOME
-  - ''
+  - UP
   - END
   - Search Selected
   - ''
   - ''
   - ''
-  - Mouse Left
-  - Mouse Down
-  - Mouse Right
-  - Scroll Up
   - ''
   - ''
   - ''
   - ''
+  - ''
+  - LEFT
+  - DOWN
+  - RIGHT
   - Copy Area Screenshot
   - ''
   - ''
   - ''
   - ''
-  - Mouse Up
-  - PG UP
-  - PG DN
+  - ''
+  - ''
+  - ''
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - ''
@@ -154,7 +154,7 @@ layers:
   - Find Prev
   - Find Next
   Magic:
-  - BT Clear
+  - ''
   - BRI DN
   - BRI UP
   - PREV
@@ -164,8 +164,8 @@ layers:
   - VOL DN
   - VOL UP
   - ''
-  - ''
   - BT Clear All
+  - BT Clear
   - Bootloader
   - ''
   - ''
@@ -176,8 +176,8 @@ layers:
   - ''
   - ''
   - ''
-  - ''
   - Bootloader
+  - ''
   - {t: Reset, type: held}
   - LED Status
   - BT 0
@@ -190,8 +190,8 @@ layers:
   - ''
   - ''
   - ''
-  - ''
   - Reset
+  - ''
   - USB Out
   - ''
   - ''
