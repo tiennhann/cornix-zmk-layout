@@ -1,0 +1,51 @@
+name: Update ZMK pin
+
+# Monthly (and on-demand) check for new ZMK commits. Opens a PR that bumps
+# the pinned SHA in config/west.yml so updates are deliberate: merge when the
+# build is green, flash both halves, revert the PR if anything regresses.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 1 * *" # 1st of each month, 08:00 UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-zmk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get latest ZMK main commit
+        id: zmk
+        run: |
+          sha=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+            https://api.github.com/repos/zmkfirmware/zmk/commits/main | jq -r '.sha')
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
+          echo "short=${sha:0:12}" >> "$GITHUB_OUTPUT"
+
+      - name: Update pin in west.yml
+        run: |
+          sed -i -E "s/revision: [0-9a-f]{40} # zmk-pin/revision: ${{ steps.zmk.outputs.sha }} # zmk-pin/" config/west.yml
+          git diff --stat
+
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: update-zmk-pin
+          title: "Update ZMK pin to ${{ steps.zmk.outputs.short }}"
+          commit-message: "Update ZMK pin to zmkfirmware/zmk@${{ steps.zmk.outputs.sha }}"
+          body: |
+            Bumps the pinned ZMK revision in `config/west.yml` to the latest
+            `zmkfirmware/zmk` main commit:
+            zmkfirmware/zmk@${{ steps.zmk.outputs.sha }}
+
+            Checklist before merging:
+            - [ ] Build workflow is green on this branch (trigger "Build ZMK firmware" manually on branch `update-zmk-pin` if it didn't run)
+            - [ ] Skim [ZMK's recent commits](https://github.com/zmkfirmware/zmk/commits/main) for breaking changes
+            - [ ] After merging: flash BOTH halves; revert this PR if anything regresses
+          delete-branch: true

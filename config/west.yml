@@ -11,15 +11,23 @@ manifest:
     - name: janpfischer
       url-base: https://github.com/janpfischer
   projects:
+    # Pinned to a known-good zmk main commit so builds are reproducible —
+    # connection behavior can't change under us between flashes.
+    # Cannot pin to a release tag: the Cornix board files need the Zephyr 4.1
+    # migration (board variants //zmk, nrf52840-nosd snippet), which is newer
+    # than the latest release (v0.3.0, Aug 2025).
+    # The update-zmk workflow opens a monthly PR bumping this SHA; merge it
+    # when CI is green, flash both halves, revert the PR if anything regresses.
     - name: zmk
       remote: zmkfirmware
-      revision: main
+      revision: 904c9aec8822d79149d42c8a9a77e8828eb08f5a # zmk-pin
       clone-depth: 1
       import:
         file: app/west.yml
+    # Pinned (2026-05-21 main) for reproducible builds.
     - name: zmk-helpers
       remote: urob
-      revision: main
+      revision: bc114546392b4615ac90a99140eaf21dde31209d
       clone-depth: 1
     # zmk-rgbled-widget is vendored under modules/zmk-rgbled-widget (not in west.yml —
     # global west import breaks all builds). Loaded only for indicator targets via
@@ -28,10 +36,10 @@ manifest:
     #   remote: hitsmaxft
     #   revision: main
     #   clone-depth: 1
+    # Pinned (2026-02-13 main, includes fix for zmk#3140 endpoint API renames).
     - name: zmk-dongle-display
-
       remote: englmaxi
-      revision: main
+      revision: 2bb333f87136d33e94a49d86236ed9ec254a8060
       clone-depth: 1
     #- name: zmk-dongle-screen
     #  remote: janpfischer
