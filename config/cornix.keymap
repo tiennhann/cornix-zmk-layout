@@ -319,7 +319,7 @@
 
         // Navigation layer (hold the right thumb Nav key). All shortcuts are macOS.
         //   Tabs:    q=prev tab   w=next tab
-        //   Browser: r=back       t=forward
+        //   Browser: e=back       r=forward
         //   Arrows:  i=up j=left k=down l=right    (vim-ish on the right hand)
         //   Home/End: u=home   o=end
         //   Select:  m=word back  ,=word fwd       .=whole line
@@ -330,7 +330,7 @@
         layer_Nav {
             display-name = "Nav";
             bindings = <
-&none  &kp LC(LS(TAB)) &kp LC(TAB)     &none           &kp LG(LBKT)    &kp LG(RBKT)                   &none      &kp HOME          &kp UP    &kp END       &search_selected    &none
+&none  &kp LC(LS(TAB)) &kp LC(TAB)     &kp LG(LBKT)    &kp LG(RBKT)    &none                          &none      &kp HOME          &kp UP    &kp END       &search_selected    &none
 &none  &none           &none           &none           &none           &none                          &none      &kp LEFT          &kp DOWN  &kp RIGHT     &kp LC(LG(LS(N4))) &none
 &none  &none           &none           &none           &none           &none           &trans  &trans  &none      &select_word_back &select_word &select_line &kp LC(LG(LS(N3))) &none
 &none  &none           &none           &mkp LCLK       &mkp RCLK       &mkp MCLK                      &trans     &none             &none     &kp LG(F)     &kp LG(LS(G))       &kp LG(G)
@@ -342,7 +342,7 @@
         layer_Magic {
             display-name = "Magic";
             bindings = <
-&none           &kp C_BRI_DN  &kp C_BRI_UP  &kp C_PREV  &kp C_NEXT  &kp C_PP                     &kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP  &none  &bt BT_CLR_ALL  &bt BT_CLR
+&none           &kp C_BRI_DN  &kp C_BRI_UP  &kp C_PREV  &kp C_NEXT  &kp C_PP                     &kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP  &none  &bt BT_CLR  &bt BT_CLR_ALL
 &bootloader     &none         &none         &none       &none       &none                        &none       &none         &none         &none  &bootloader  &none
 &sys_reset      &show_status  &bt_0         &bt_1       &bt_2       &none         &trans  &trans  &none       &none         &none         &none  &sys_reset  &none
 &out OUT_USB    &none         &none         &none       &none       &none                        &none       &none         &none         &none  &none  &none
