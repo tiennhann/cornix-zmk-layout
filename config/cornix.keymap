@@ -320,17 +320,19 @@
         // Navigation layer (hold the right thumb Nav key). All shortcuts are macOS.
         //   Tabs:    q=prev tab   w=next tab
         //   Browser: r=back       t=forward
-        //   Paging:  y=page up    h=page down      u=home   o=end   (left hand only)
+        //   Arrows:  i=up j=left k=down l=right    (vim-ish on the right hand)
+        //   Home/End: u=home   o=end
         //   Select:  m=word back  ,=word fwd       .=whole line
         //   Search:  p=search selected text        find/prev/next on palms
         //   Screens: ;=copy area screenshot        /=copy full screenshot
-        // Left hand also has mouse keys (Cornix has no trackpad).
+        // Left hand click keys remain (Cornix has no trackpad); mouse move,
+        // scroll, and page up/down were removed from this layer.
         layer_Nav {
             display-name = "Nav";
             bindings = <
-&none  &kp LC(LS(TAB)) &kp LC(TAB)     &none           &kp LG(LBKT)    &kp LG(RBKT)                   &none      &kp HOME          &none     &kp END       &search_selected    &none
-&none  &none           &mmv MOVE_LEFT  &mmv MOVE_DOWN  &mmv MOVE_RIGHT &msc SCRL_UP                   &none      &none             &none     &none         &kp LC(LG(LS(N4))) &none
-&none  &none           &none           &mmv MOVE_UP    &kp PG_UP       &kp PG_DN       &trans  &trans  &none      &select_word_back &select_word &select_line &kp LC(LG(LS(N3))) &none
+&none  &kp LC(LS(TAB)) &kp LC(TAB)     &none           &kp LG(LBKT)    &kp LG(RBKT)                   &none      &kp HOME          &kp UP    &kp END       &search_selected    &none
+&none  &none           &none           &none           &none           &none                          &none      &kp LEFT          &kp DOWN  &kp RIGHT     &kp LC(LG(LS(N4))) &none
+&none  &none           &none           &none           &none           &none           &trans  &trans  &none      &select_word_back &select_word &select_line &kp LC(LG(LS(N3))) &none
 &none  &none           &none           &mkp LCLK       &mkp RCLK       &mkp MCLK                      &trans     &none             &none     &kp LG(F)     &kp LG(LS(G))       &kp LG(G)
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp C_VOL_UP C_VOL_DN>;
@@ -340,9 +342,9 @@
         layer_Magic {
             display-name = "Magic";
             bindings = <
-&bt BT_CLR      &kp C_BRI_DN  &kp C_BRI_UP  &kp C_PREV  &kp C_NEXT  &kp C_PP                     &kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP  &none  &none  &bt BT_CLR_ALL
-&bootloader     &none         &none         &none       &none       &none                        &none       &none         &none         &none  &none  &bootloader
-&sys_reset      &show_status  &bt_0         &bt_1       &bt_2       &none         &trans  &trans  &none       &none         &none         &none  &none  &sys_reset
+&none           &kp C_BRI_DN  &kp C_BRI_UP  &kp C_PREV  &kp C_NEXT  &kp C_PP                     &kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP  &none  &bt BT_CLR_ALL  &bt BT_CLR
+&bootloader     &none         &none         &none       &none       &none                        &none       &none         &none         &none  &bootloader  &none
+&sys_reset      &show_status  &bt_0         &bt_1       &bt_2       &none         &trans  &trans  &none       &none         &none         &none  &sys_reset  &none
 &out OUT_USB    &none         &none         &none       &none       &none                        &none       &none         &none         &none  &none  &none
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
