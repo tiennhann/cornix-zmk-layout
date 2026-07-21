@@ -70,8 +70,7 @@
         wakeup-sources = <&kscan0>;
     };
 
-    chosen {
-        zmk,bttery = &vbatt;
-    };
+    // Battery chosen is already set in nrf_e73.dtsi (zmk,battery = &vbatt).
+    // Do not redeclare it here — a previous typo (zmk,bttery) was a no-op.
 
 };
