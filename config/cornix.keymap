@@ -367,16 +367,17 @@
 
         // Gaming layer (sticky): hold Nav + Symbol thumb to enter.
         // Left cluster for home-row gaming:
-        //   Q W E R T → A S D F G
+        //   Q W E R T → 1 2 3 4 5
+        //   A S D F G → Q W E R T
         //   V B → D F
-        //   Middle left thumb (Bspc) → Space
+        //   Tab / Esc kept; middle left thumb → Space
         // Right hand keeps normal keys (incl. P); K+L combo = Enter.
         // Tap Nav or Symbol thumb to return to Base. No home-row mods.
         layer_Gaming {
             display-name = "Gaming";
             bindings = <
-&kp TAB   &kp A   &kp S   &kp D   &kp F   &kp G                        &kp Y   &kp U   &kp I    &kp O    &kp P    &kp BSLH
-&kp ESC   &kp N1  &kp N2  &kp N3  &kp N4  &kp N5                       &kp H   &kp J   &kp K    &kp L    &kp SEMI &kp SQT
+&kp TAB   &kp N1  &kp N2  &kp N3  &kp N4  &kp N5                       &kp Y   &kp U   &kp I    &kp O    &kp P    &kp BSLH
+&kp ESC   &kp Q   &kp W   &kp E   &kp R   &kp T                        &kp H   &kp J   &kp K    &kp L    &kp SEMI &kp SQT
 &trans    &kp Z   &kp X   &kp C   &kp D   &kp F         &trans  &trans  &kp N   &kp M   &kp COMMA &kp DOT &kp FSLH &trans
 &trans    &trans  &kp LGUI &kp LCTRL &kp SPACE &to LAYER_Base           &to LAYER_Base &kp SPACE &kp LALT &trans &trans &trans
             >;
