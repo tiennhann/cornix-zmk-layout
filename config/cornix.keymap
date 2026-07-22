@@ -26,6 +26,7 @@
 #define LAYER_Nav 2
 #define LAYER_Magic 3
 #define LAYER_Keypad 4
+#define LAYER_Gaming 5
 
 // Key positions per hand, used for positional home row mods.
 // Left-hand keys trigger holds only when followed by a right-hand key or thumb,
@@ -325,6 +326,7 @@
         //   Select:  m=word back  ,=word fwd       .=whole line
         //   Search:  p=search selected text        find/prev/next on palms
         //   Screens: ;=copy area screenshot        /=copy full screenshot
+        // Gaming: hold Nav + Symbol thumb → Gaming layer.
         // Left hand click keys remain (Cornix has no trackpad); mouse move,
         // scroll, and page up/down were removed from this layer.
         layer_Nav {
@@ -333,7 +335,7 @@
 &none  &kp LC(LS(TAB)) &kp LC(TAB)     &kp LG(LBKT)    &kp LG(RBKT)    &none                          &none      &kp HOME          &kp UP    &kp END       &search_selected    &none
 &none  &none           &none           &none           &none           &none                          &none      &kp LEFT          &kp DOWN  &kp RIGHT     &kp LC(LG(LS(N4))) &none
 &none  &none           &none           &none           &none           &none           &trans  &trans  &none      &select_word_back &select_word &select_line &kp LC(LG(LS(N3))) &none
-&none  &none           &none           &mkp LCLK       &mkp RCLK       &mkp MCLK                      &trans     &none             &none     &kp LG(F)     &kp LG(LS(G))       &kp LG(G)
+&none  &none           &none           &mkp LCLK       &mkp RCLK       &to LAYER_Gaming               &trans     &none             &none     &kp LG(F)     &kp LG(LS(G))       &kp LG(G)
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp C_VOL_UP C_VOL_DN>;
         };
@@ -359,6 +361,24 @@
 &trans            &none       &kp HOME   &kp UP     &kp END        &kp PG_UP                    &kp KP_N7  &kp KP_N8  &kp KP_N9    &kp KP_MINUS  &kp KP_SLASH    &kp F12
 &mo LAYER_Magic   &kp LG(Z)   &kp LG(X)  &kp LG(C)  &kp LG(V)      &kp LG(LS(V)) &trans  &trans  &kp KP_N4  &kp KP_N5  &kp KP_N6    &kp KP_PLUS   &kp KP_MULTIPLY &to LAYER_Base
 &none             &none       &none      &mo LAYER_Symbol &trans    &kp KP_N0                    &kp KP_N1  &kp KP_N2  &kp KP_N3    &kp KP_ENTER  &kp KP_DOT      &kp BSPC
+            >;
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
+        };
+
+        // Gaming layer (sticky): hold Nav + Symbol thumb to enter.
+        // Left cluster shifted for home-row gaming:
+        //   Q W E R → 1 2 3 4
+        //   A S D F G → A Q W E R
+        //   V B → D F
+        //   Middle left thumb (Bspc) → Space
+        // Tap Nav or Symbol thumb to return to Base. No home-row mods.
+        layer_Gaming {
+            display-name = "Gaming";
+            bindings = <
+&kp TAB   &kp N1  &kp N2  &kp N3  &kp N4  &kp N5                       &trans  &trans  &trans  &trans  &trans  &trans
+&kp ESC   &kp A   &kp Q   &kp W   &kp E   &kp R                        &trans  &trans  &trans  &trans  &trans  &trans
+&trans    &kp Z   &kp X   &kp C   &kp D   &kp F         &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+&trans    &trans  &kp LGUI &kp LCTRL &kp SPACE &to LAYER_Base           &to LAYER_Base &kp SPACE &kp LALT &trans &trans &trans
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };

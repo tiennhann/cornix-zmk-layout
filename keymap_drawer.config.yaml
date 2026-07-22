@@ -30,6 +30,7 @@ parse_config:
     # --- Custom behaviors that the parser can't trace; label them manually ---
     "&keypad_td": Keypad
     "&to LAYER_Base": Base
+    "&to LAYER_Gaming": Gaming
     # --- Magic / firmware ---
     "&bt_0": BT 0
     "&bt_1": BT 1
