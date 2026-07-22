@@ -257,29 +257,29 @@ layers:
   - BSPC
   Gaming:
   - TAB
+  - A
+  - S
+  - D
+  - F
+  - G
+  - Y
+  - U
+  - I
+  - O
+  - P
+  - \
+  - ESC
   - '1'
   - '2'
   - '3'
   - '4'
   - '5'
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - ESC
-  - A
-  - Q
-  - W
-  - E
-  - R
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - H
+  - J
+  - K
+  - L
+  - ;
+  - ''''
   - {t: ▽, type: trans}
   - Z
   - X
@@ -288,11 +288,11 @@ layers:
   - F
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - N
+  - M
+  - ','
+  - .
+  - /
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -309,4 +309,4 @@ layers:
 combos:
 - p: [20, 21]
   k: RET
-  l: [Base]
+  l: [Base, Gaming]
