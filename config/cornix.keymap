@@ -283,7 +283,7 @@
             timeout-ms = <60>;
             key-positions = <20 21>;
             bindings = <&kp RET>;
-            layers = <LAYER_Base>;
+            layers = <LAYER_Base LAYER_Gaming>;
         };
 
     };
@@ -366,18 +366,18 @@
         };
 
         // Gaming layer (sticky): hold Nav + Symbol thumb to enter.
-        // Left cluster shifted for home-row gaming:
-        //   Q W E R → 1 2 3 4
-        //   A S D F G → A Q W E R
+        // Left cluster for home-row gaming:
+        //   Q W E R T → A S D F G
         //   V B → D F
         //   Middle left thumb (Bspc) → Space
+        // Right hand keeps normal keys (incl. P); K+L combo = Enter.
         // Tap Nav or Symbol thumb to return to Base. No home-row mods.
         layer_Gaming {
             display-name = "Gaming";
             bindings = <
-&kp TAB   &kp N1  &kp N2  &kp N3  &kp N4  &kp N5                       &trans  &trans  &trans  &trans  &trans  &trans
-&kp ESC   &kp A   &kp Q   &kp W   &kp E   &kp R                        &trans  &trans  &trans  &trans  &trans  &trans
-&trans    &kp Z   &kp X   &kp C   &kp D   &kp F         &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans
+&kp TAB   &kp A   &kp S   &kp D   &kp F   &kp G                        &kp Y   &kp U   &kp I    &kp O    &kp P    &kp BSLH
+&kp ESC   &kp N1  &kp N2  &kp N3  &kp N4  &kp N5                       &kp H   &kp J   &kp K    &kp L    &kp SEMI &kp SQT
+&trans    &kp Z   &kp X   &kp C   &kp D   &kp F         &trans  &trans  &kp N   &kp M   &kp COMMA &kp DOT &kp FSLH &trans
 &trans    &trans  &kp LGUI &kp LCTRL &kp SPACE &to LAYER_Base           &to LAYER_Base &kp SPACE &kp LALT &trans &trans &trans
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
