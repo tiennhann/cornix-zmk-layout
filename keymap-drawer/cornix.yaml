@@ -283,7 +283,7 @@ layers:
   - LCTRL
   - A
   - X
-  - C
+  - B
   - D
   - F
   - {t: ▽, type: trans}
@@ -294,7 +294,7 @@ layers:
   - .
   - /
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - P
   - {t: ▽, type: trans}
   - LGUI
   - LCTRL
