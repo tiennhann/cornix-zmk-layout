@@ -261,7 +261,7 @@ layers:
   - '2'
   - '3'
   - '4'
-  - '5'
+  - T
   - Y
   - U
   - I
@@ -273,7 +273,7 @@ layers:
   - W
   - E
   - R
-  - T
+  - G
   - H
   - J
   - K
@@ -298,10 +298,10 @@ layers:
   - {t: ▽, type: trans}
   - LGUI
   - LCTRL
-  - BSPC
-  - Base
-  - Base
   - SPACE
+  - Base
+  - Base
+  - BSPC
   - LALT
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}

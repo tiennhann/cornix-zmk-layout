@@ -1216,7 +1216,7 @@ rect.held, rect.combo.held {
 </g>
 <g transform="translate(308, 56)" class="key keypos-5">
 <rect rx="6" ry="6" x="-26" y="-26" width="52" height="52" class="key"/>
-<text x="0" y="0" class="key tap">5</text>
+<text x="0" y="0" class="key tap">T</text>
 </g>
 <g transform="translate(504, 56)" class="key keypos-6">
 <rect rx="6" ry="6" x="-26" y="-26" width="52" height="52" class="key"/>
@@ -1264,7 +1264,7 @@ rect.held, rect.combo.held {
 </g>
 <g transform="translate(308, 112)" class="key keypos-17">
 <rect rx="6" ry="6" x="-26" y="-26" width="52" height="52" class="key"/>
-<text x="0" y="0" class="key tap">T</text>
+<text x="0" y="0" class="key tap">G</text>
 </g>
 <g transform="translate(504, 112)" class="key keypos-18">
 <rect rx="6" ry="6" x="-26" y="-26" width="52" height="52" class="key"/>
@@ -1364,7 +1364,7 @@ rect.held, rect.combo.held {
 </g>
 <g transform="translate(286, 236) rotate(11.93)" class="key keypos-42">
 <rect rx="6" ry="6" x="-26" y="-26" width="52" height="52" class="key"/>
-<text x="0" y="0" class="key tap">BSPC</text>
+<text x="0" y="0" class="key tap">SPACE</text>
 </g>
 <g transform="translate(345, 257) rotate(23.0)" class="key keypos-43">
 <rect rx="6" ry="6" x="-26" y="-26" width="52" height="52" class="key"/>
@@ -1378,7 +1378,7 @@ rect.held, rect.combo.held {
 </a></g>
 <g transform="translate(526, 236) rotate(-11.93)" class="key keypos-45">
 <rect rx="6" ry="6" x="-26" y="-26" width="52" height="52" class="key"/>
-<text x="0" y="0" class="key tap">SPACE</text>
+<text x="0" y="0" class="key tap">BSPC</text>
 </g>
 <g transform="translate(588, 231)" class="key keypos-46">
 <rect rx="6" ry="6" x="-26" y="-26" width="52" height="52" class="key"/>
