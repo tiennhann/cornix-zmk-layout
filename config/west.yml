@@ -20,7 +20,7 @@ manifest:
     # when CI is green, flash both halves, revert the PR if anything regresses.
     - name: zmk
       remote: zmkfirmware
-      revision: 904c9aec8822d79149d42c8a9a77e8828eb08f5a # zmk-pin
+      revision: 4dd95d7840eb3d5a3f59bb29fbf1ab054715ef85 # zmk-pin
       clone-depth: 1
       import:
         file: app/west.yml
